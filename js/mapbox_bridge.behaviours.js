@@ -43,7 +43,7 @@
 
               // create the popups
               if (setting.mapboxBridge.popup.enabled) {
-                Drupal.MapboxPopup.popups(Drupal.Mapbox.layers, setting.mapboxBridge.popup.popup_viewmode);
+                Drupal.MapboxPopup.popups(Drupal.Mapbox.layers, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
               }
 
               // check for touch devices and disable pan and zoom
