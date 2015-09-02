@@ -23,7 +23,7 @@
             .on('click', function(marker) {
 
               // load the node with the supplied viewmode
-              $( '#custom-popup-id-' + marker.target._leaflet_id ).load('/' + settings.path_settings.domain_variant + '/' + settings.path_settings.language + '/mapbox_bridge_ajax_content/' + viewmode + '/' + marker.target.options.nid, function(content){
+              $( '#custom-popup-id-' + marker.target._leaflet_id ).load('/' + settings.path_settings.language + '/mapbox_bridge_ajax_content/' + viewmode + '/' + marker.target.options.nid, function(content){
                 var $this = $(this),
                     $content = $('> div:first-child', $this);
 

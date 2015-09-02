@@ -44,7 +44,6 @@ function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE
     drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
     drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css', 'external');
 
-    global $_domain_variant;
     global $language;
 
     // add $map_id and token to javascript settings
@@ -55,7 +54,7 @@ function mapbox_bridge_render_map($map_id, $data = FALSE, $type, $legend = FALSE
       'legend' => $legend,
       'maxZoom' => $max_zoom,
       'popup' => $popup,
-      'path_settings' => array('domain_variant' => $_domain_variant->prefix, 'language' => $language->prefix)
+      'path_settings' => array('language' => $language->prefix)
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic
