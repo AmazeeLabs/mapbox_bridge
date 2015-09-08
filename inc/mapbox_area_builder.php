@@ -112,7 +112,7 @@ class MapboxAreaBuilder {
       $mapMarkers = $this->processMarkersSymbol($mapMarkers);
 
     } else if (is_string($this->object)) {
-      $mapMarkers = file_get_contents(url($this->object));
+      $mapMarkers = file_get_contents(url($this->object, array('absolute' => TRUE)));
       $mapMarkers = json_decode($mapMarkers);
       $type = 'json';
 
