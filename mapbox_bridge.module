@@ -85,6 +85,7 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic
+    drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.content.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.popup.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.panControls.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.filter.js', array('group' => JS_LIBRARY, 'weight' => -1));
