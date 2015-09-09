@@ -55,7 +55,7 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['name'],
         $conf['icon'],
         $conf['mapbox_max_zoom'],
-        array('enabled' => $conf['popup'], 'popup_viewmode' => str_replace('node_', '', $conf['popup_viewmode'])),
+        array('enabled' => $conf['popup'], 'popup_viewmode' => str_replace('node_', '', $conf['popup_viewmode']), 'panTo' => $conf['popup_pan']),
         array('src' => $conf['custom_icon_src'], 'width' => $conf['custom_icon_width'], 'height' => $conf['custom_icon_height']),
         $conf['marker_anchor'],
         array('enabled' => false),
@@ -193,6 +193,13 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
         'input[name="popup"]' => array('checked' => FALSE),
       ),
     ),
+  );
+
+  $form['mapbox_marker']['popup_pan'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Pan to marker instead of popup'),
+    '#description' => t('Instead of centering around the popup, center around the markers position.'),
+    '#default_value' => $conf['popup_pan'],
   );
 
   $form['mapbox_marker']['legend'] = array(

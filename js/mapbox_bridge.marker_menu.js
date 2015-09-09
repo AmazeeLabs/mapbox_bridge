@@ -7,7 +7,7 @@
     setup: function(layers, context, setting) {
 
       // insert the "menu"
-      $('<div id="mapbox-marker-menu" class="mapbox-marker-menu menu-wrapper"></div>').appendTo('#map');
+      $('<div id="mapbox-marker-menu" class="mapbox-marker-menu menu-wrapper"></div>').insertAfter('#map');
 
       // get the wrapper
       var menu = document.getElementById('mapbox-marker-menu');
@@ -42,9 +42,6 @@
 
             // When a menu item is clicked, open its associated marker.
             marker.openPopup();
-
-            // call the MapboxPopup to load the content
-            //Drupal.MapboxPopup.load('#custom-popup-id-' + marker._leaflet_id, marker, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
           }
           return false;
         };

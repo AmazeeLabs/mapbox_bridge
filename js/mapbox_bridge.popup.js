@@ -46,7 +46,12 @@
               var px = Drupal.Mapbox.map.project(marker._latlng); // find the pixel location on the map where the popup anchor is
               px.y -= marker._popup._container.clientHeight / 2; // find the height of the popup container, divide by 2, subtract from the Y axis of marker location
 
-              Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px), { animate: true }); // pan to new center
+              // panTo
+              if (settings.popup.panTo) {
+                Drupal.Mapbox.map.panTo( marker.getLatLng() );
+              } else {
+                Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px), { animate: true });
+              }
             });
           });
         });
