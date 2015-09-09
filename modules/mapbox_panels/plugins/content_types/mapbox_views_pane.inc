@@ -61,7 +61,9 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
         array('enabled' => false),
         $conf['cluster'],
         $conf['proximity'],
-        $conf['center']
+        $conf['center'],
+        $conf['marker_menu'],
+        $conf['menu_viewmode']
       );
 
       // save to block content
@@ -299,6 +301,26 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
         ':input[name="type"]' => array('empty' => TRUE),
       )
     )
+  );
+
+  $form['mapbox_menu'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Marker Menu'),
+    '#description' => t('Create a marker menu, example !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/marker-navigation-from-menu-list/', array('attributes' => array('target' => '_blank'))))),
+  );
+
+  $form['mapbox_menu']['marker_menu'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Marker Menu'),
+    '#default_value' => $conf['marker_menu'],
+  );
+
+  $form['mapbox_menu']['menu_viewmode'] = array(
+    '#type' => 'select',
+    '#title' => t('Viewmode'),
+    '#options' => $options,
+    '#description' => t('Viewmode to be used when displaying the menu'),
+    '#default_value' => $conf['menu_viewmode'],
   );
 
   return $form;

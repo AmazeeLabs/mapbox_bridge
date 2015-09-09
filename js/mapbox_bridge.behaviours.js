@@ -97,6 +97,11 @@
         Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
       }
 
+      // create menu
+      if (setting.mapboxBridge.marker_menu.enabled) {
+        Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
+      }
+
       // check for touch devices and disable pan and zoom
       if ('ontouchstart' in document.documentElement) {
         Drupal.behaviors.mapboxBridge.panAndZoom(false);
