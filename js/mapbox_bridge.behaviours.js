@@ -173,7 +173,8 @@
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
             marker: {
-              'marker-symbol': markerData.type
+              'marker-symbol': markerData.type,
+              iconUrl: 'https://api.mapbox.com/v4/marker/pin-m.png?access_token=' + L.mapbox.accessToken
             }
           };
         }

@@ -80,7 +80,7 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
       'cluster' => $cluster,
       'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
       'center' => $center,
-      'path_settings' => array('domain_variant' => !empty($_domain_variant) ? $_domain_variant->prefix : '', 'language' => $language->prefix)
+      'path_settings' => array('domain_variant' => !empty($_domain_variant) ? $_domain_variant->prefix : FALSE, 'language' => !empty($language->prefix) ? $language->prefix : FALSE)
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic

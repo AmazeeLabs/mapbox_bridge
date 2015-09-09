@@ -263,10 +263,16 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     )
   );
 
-  $form['mapbox_type'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Symbol'),
-    '#description' => t('Fields used to determine marker\'s type symbol'),
+  $form['mapbox_type']['custom_icon_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Icon height'),
+    '#description' => t('Icon height in pixels (needed for positioning)'),
+    '#default_value' => $conf['custom_icon_height'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
   );
 
   $form['mapbox_type']['name'] = array(
@@ -275,6 +281,11 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Field used to get standard symbol name (e.g.: bus, heart etc) for the marker (field types: text, list_text)'),
     '#default_value' => $conf['name'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/list_text,text/',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => TRUE),
+      )
+    )
   );
 
   $form['mapbox_type']['icon'] = array(
@@ -283,6 +294,11 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Field used to get custom icon file (field types: image, file)'),
     '#default_value' => $conf['icon'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/image,file/',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => TRUE),
+      )
+    )
   );
 
   return $form;

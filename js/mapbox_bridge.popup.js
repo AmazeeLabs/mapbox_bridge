@@ -20,8 +20,19 @@
           // Bind popups to a click event
           .on('click', function(marker) {
 
+            var path = '';
+            if (settings.path_settings.domain_variant) {
+              path += '/' + settings.path_settings.domain_variant;
+            }
+
+            if (settings.path_settings.language) {
+              path += '/' + settings.path_settings.language;
+            }
+
+            path += '/mapbox_bridge_ajax_content/' + viewmode + '/' + marker.target.feature.properties.nid;
+
             // load the node with the supplied viewmode
-            $( '#custom-popup-id-' + marker.target._leaflet_id ).load('/' + settings.path_settings.domain_variant + '/' + settings.path_settings.language + '/mapbox_bridge_ajax_content/' + viewmode + '/' + marker.target.feature.properties.nid, function(content){
+            $( '#custom-popup-id-' + marker.target._leaflet_id ).load(path, function(content){
               var $this = $(this),
                   $content = $('> div:first-child', $this);
 
