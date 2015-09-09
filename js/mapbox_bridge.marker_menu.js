@@ -7,7 +7,7 @@
     setup: function(layers, context, setting) {
 
       // insert the "menu"
-      $('<div id="mapbox-marker-menu" class="mapbox-marker-menu menu-wrapper"></div>').insertAfter('#map');
+      $('<div id="mapbox-marker-menu" class="mapbox-marker-menu menu-wrapper"></div>').appendTo('#map');
 
       // get the wrapper
       var menu = document.getElementById('mapbox-marker-menu');
