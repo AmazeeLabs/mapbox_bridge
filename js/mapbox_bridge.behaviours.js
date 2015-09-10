@@ -26,7 +26,9 @@
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
             if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
-              Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting);
+              $.when(Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting)).done(function(){
+                Drupal.behaviors.mapboxBridge.alter();
+              });
             }
           });
         });
@@ -329,6 +331,13 @@
       }
 
       return [offsetX, offsetY];
+    },
+
+    /**
+     * Alter function, copy this (Drupal.behaviors.mapboxBridge.alter()) into your own .js file to execute code after the map has finished loading.
+     */
+    alter: function(data) {
+
     }
   };
   // end Drupal.behaviors.mapboxBridge.getIconAnchor

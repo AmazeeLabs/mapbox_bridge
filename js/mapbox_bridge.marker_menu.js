@@ -18,13 +18,12 @@
       layers.eachLayer(function(marker) {
 
         var link = menu.appendChild(document.createElement('a'));
-        link.className = 'menu-item loading';
+        link.className = 'menu-item loading menu-item-nid-' + marker.feature.properties.nid;
         link.href = '#';
-        link.setAttribute('id', 'menu-item-nid-' + marker._leaflet_id);
+        link.setAttribute('id', 'menu-item-id-' + marker._leaflet_id);
 
         // load the specified contents into the navigation
-        //console.log(setting.mapboxBridge.marker_menu.viewmode);
-        Drupal.MapboxContent.load('#menu-item-nid-' + marker._leaflet_id, marker, setting.mapboxBridge.marker_menu.viewmode, setting.mapboxBridge);
+        Drupal.MapboxContent.load('#menu-item-id-' + marker._leaflet_id, marker, setting.mapboxBridge.marker_menu.viewmode, setting.mapboxBridge);
 
         // Populate content from each markers object.
         link.innerHTML = marker.feature.properties.nid;
@@ -45,6 +44,18 @@
           }
           return false;
         };
+      });
+
+      Drupal.Mapbox.map.on('popupopen', function(event) {
+        var marker = event.popup._source;
+
+        $('.menu-item-nid-' + marker.feature.properties.nid).addClass('active');
+      });
+
+      Drupal.Mapbox.map.on('popupclose', function(event) {
+        var marker = event.popup._source;
+
+        $('.menu-item-nid-' + marker.feature.properties.nid).removeClass('active');
       });
     }
   };

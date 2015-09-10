@@ -15,7 +15,8 @@
 
         // setup a minimum with for the popup, see http://leafletjs.com/reference.html#popup for other options
         layer.bindPopup(content, {
-          minWidth: 150
+          minWidth: 150,
+          className: 'popup-nid-' + layer.feature.properties.nid
         });
 
         Drupal.Mapbox.map.on('popupopen', function(e) {
