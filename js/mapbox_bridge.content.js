@@ -28,7 +28,14 @@
         if (onComplete) {
           onComplete($this);
         }
+
+        // general complete function, can be overwritten
+        Drupal.MapboxContent.onComplete($this);
       });
+    },
+
+    onComplete: function (e) {
+      // copy this to your own .js file to overwrite it
     }
   };
 })(jQuery);

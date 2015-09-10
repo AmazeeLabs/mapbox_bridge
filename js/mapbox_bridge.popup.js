@@ -20,6 +20,8 @@
         });
 
         Drupal.Mapbox.map.on('popupopen', function(e) {
+          Drupal.MapboxPopup.activePopup = e;
+
           $('#custom-popup-id-' + layer._leaflet_id).once(function(){
 
             // get the marker
@@ -37,10 +39,10 @@
                   width: $this.width() + 'px', // to fix jQuery's jumpy sliding effect
                   opacity: 0
                 })
-                .slideDown('normal').after(function(){
+                .slideDown('fast').after(function(){
                   $content.animate({
                     opacity: 1
-                  }, 'fast');
+                  }, 'normal');
                 });
 
               // center the newly clicked marker
@@ -51,7 +53,7 @@
               if (settings.popup.panTo) {
                 Drupal.Mapbox.map.panTo( marker.getLatLng() );
               } else {
-                Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px), { animate: true });
+                Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px) );
               }
             });
           });
