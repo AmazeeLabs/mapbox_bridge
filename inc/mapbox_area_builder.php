@@ -76,7 +76,7 @@ class MapboxAreaBuilder {
    * @param array $markerAnchor
    *  Marker's anchor position
    */
-  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode) {
+  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = NULL) {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
