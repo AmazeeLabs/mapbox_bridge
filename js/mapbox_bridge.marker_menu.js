@@ -50,9 +50,7 @@
         var marker = event.popup._source;
 
         $('.menu-item-nid-' + marker.feature.properties.nid).addClass('active');
-      });
-
-      Drupal.Mapbox.map.on('popupclose', function(event) {
+      }).on('popupclose', function(event) {
         var marker = event.popup._source;
 
         $('.menu-item-nid-' + marker.feature.properties.nid).removeClass('active');
