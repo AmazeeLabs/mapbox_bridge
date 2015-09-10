@@ -26,7 +26,9 @@
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
             if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
-              Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting);
+              $.when(Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting)).done(function(){
+                Drupal.behaviors.mapboxBridge.alter();
+              });
             }
           });
         });
@@ -95,6 +97,11 @@
       // create filters
       if (setting.mapboxBridge.filter.enabled) {
         Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
+      }
+
+      // create menu
+      if (setting.mapboxBridge.marker_menu.enabled) {
+        Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
       }
 
       // check for touch devices and disable pan and zoom
@@ -173,7 +180,8 @@
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
             marker: {
-              'marker-symbol': markerData.type
+              'marker-symbol': markerData.type,
+              iconUrl: 'https://api.mapbox.com/v4/marker/pin-m.png?access_token=' + L.mapbox.accessToken
             }
           };
         }
@@ -323,6 +331,13 @@
       }
 
       return [offsetX, offsetY];
+    },
+
+    /**
+     * Alter function, copy this (Drupal.behaviors.mapboxBridge.alter()) into your own .js file to execute code after the map has finished loading.
+     */
+    alter: function(data) {
+
     }
   };
   // end Drupal.behaviors.mapboxBridge.getIconAnchor

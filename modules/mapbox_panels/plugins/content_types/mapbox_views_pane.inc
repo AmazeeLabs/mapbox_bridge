@@ -55,13 +55,15 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['name'],
         $conf['icon'],
         $conf['mapbox_max_zoom'],
-        array('enabled' => $conf['popup'], 'popup_viewmode' => str_replace('node_', '', $conf['popup_viewmode'])),
+        array('enabled' => $conf['popup'], 'popup_viewmode' => str_replace('node_', '', $conf['popup_viewmode']), 'panTo' => $conf['popup_pan']),
         array('src' => $conf['custom_icon_src'], 'width' => $conf['custom_icon_width'], 'height' => $conf['custom_icon_height']),
         $conf['marker_anchor'],
         array('enabled' => false),
         $conf['cluster'],
         $conf['proximity'],
-        $conf['center']
+        $conf['center'],
+        $conf['marker_menu'],
+        $conf['menu_viewmode']
       );
 
       // save to block content
@@ -193,6 +195,13 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     ),
   );
 
+  $form['mapbox_marker']['popup_pan'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Pan to marker instead of popup'),
+    '#description' => t('Instead of centering around the popup, center around the markers position.'),
+    '#default_value' => $conf['popup_pan'],
+  );
+
   $form['mapbox_marker']['legend'] = array(
     '#type' => 'checkbox',
     '#title' => t('Mapbox Legend'),
@@ -263,10 +272,16 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     )
   );
 
-  $form['mapbox_type'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Symbol'),
-    '#description' => t('Fields used to determine marker\'s type symbol'),
+  $form['mapbox_type']['custom_icon_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Icon height'),
+    '#description' => t('Icon height in pixels (needed for positioning)'),
+    '#default_value' => $conf['custom_icon_height'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
   );
 
   $form['mapbox_type']['name'] = array(
@@ -275,6 +290,11 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Field used to get standard symbol name (e.g.: bus, heart etc) for the marker (field types: text, list_text)'),
     '#default_value' => $conf['name'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/list_text,text/',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => TRUE),
+      )
+    )
   );
 
   $form['mapbox_type']['icon'] = array(
@@ -283,6 +303,31 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('Field used to get custom icon file (field types: image, file)'),
     '#default_value' => $conf['icon'],
     '#autocomplete_path' => 'mapbox_views_field_matching/autocomplete/taxonomy_term/image,file/',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => TRUE),
+      )
+    )
+  );
+
+  $form['mapbox_menu'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Marker Menu'),
+    '#description' => t('Create a marker menu, example !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/marker-navigation-from-menu-list/', array('attributes' => array('target' => '_blank'))))),
+  );
+
+  $form['mapbox_menu']['marker_menu'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Marker Menu'),
+    '#default_value' => $conf['marker_menu'],
+  );
+
+  $form['mapbox_menu']['menu_viewmode'] = array(
+    '#type' => 'select',
+    '#title' => t('Viewmode'),
+    '#options' => $options,
+    '#description' => t('Viewmode to be used when displaying the menu'),
+    '#default_value' => $conf['menu_viewmode'],
   );
 
   return $form;

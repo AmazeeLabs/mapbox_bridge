@@ -39,7 +39,7 @@ function mapbox_bridge_ajax_content($viewmode, $nid) {
  *
  * Custom function to draw the map
  * */
-function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE) {
+function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE) {
   if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
@@ -80,14 +80,17 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
       'cluster' => $cluster,
       'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
       'center' => $center,
-      'path_settings' => array('domain_variant' => !empty($_domain_variant) ? $_domain_variant->prefix : '', 'language' => $language->prefix)
+      'marker_menu' => array('enabled' => $marker_menu, 'viewmode' => $menu_viewmode),
+      'path_settings' => array('domain_variant' => !empty($_domain_variant) ? $_domain_variant->prefix : FALSE, 'language' => !empty($language->prefix) ? $language->prefix : FALSE)
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic
+    drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.content.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.popup.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.panControls.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.filter.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.behaviours.js', array('group' => JS_LIBRARY, 'weight' => -1));
+    drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.marker_menu.js', array('group' => JS_LIBRARY, 'weight' => -1));
 
     // add mapbox_bridge.css for basic style overrides to mapbox
     drupal_add_css(drupal_get_path('module', 'mapbox_bridge') . '/css/mapbox_bridge.css', array('group' => CSS_DEFAULT));
