@@ -34,7 +34,6 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
   }
 
   // block content
-  module_load_include('php', 'mapbox_bridge', 'inc/mapbox_area_builder');
   try {
     // first value is the view_id, the second is the display_id
     $view_attributes = explode('__', $conf['mapbox_view']);

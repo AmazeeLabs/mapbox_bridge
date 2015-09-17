@@ -4,8 +4,7 @@
    * Mapbox Content Ajax Loader
    */
   Drupal.MapboxContent = {
-    load: function(target, marker, viewmode, settings, onComplete) {
-
+    load: function(target, marker, settings, onComplete) {
       var path = '';
       if (settings.path_settings.domain_variant) {
         path += '/' + settings.path_settings.domain_variant;
@@ -15,7 +14,7 @@
         path += '/' + settings.path_settings.language;
       }
 
-      path += '/mapbox_bridge_ajax_content/' + viewmode + '/' + marker.feature.properties.nid;
+      path += '/mapbox_bridge_ajax_content/' + settings.popup.popup_entity_type + '/' + settings.popup.popup_viewmode + '/' + marker.feature.properties.popup_entity_id;
 
       // load the node with the supplied viewmode
       $(target).load(path, function(content){

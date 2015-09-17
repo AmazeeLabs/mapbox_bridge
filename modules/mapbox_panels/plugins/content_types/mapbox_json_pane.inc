@@ -34,7 +34,6 @@ function mapbox_json_pane_render_pane($subtype, $conf, $args, $context) {
   }
 
   // block content
-  module_load_include('php', 'mapbox_bridge', 'inc/mapbox_area_builder');
   try {
     // create the mapbox
     $mapBuilder = new MapboxAreaBuilder(

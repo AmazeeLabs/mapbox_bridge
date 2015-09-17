@@ -268,7 +268,6 @@ class MapboxField {
    */
   public static function formatterView($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
     $elements = array();
-    module_load_include('php', 'mapbox_bridge', 'inc/mapbox_area_builder');
     foreach ($items as $delta => $item) {
       try {
         $mapbox_source = mapbox_bridge_get_data_source($item, $entity_type, $entity);

@@ -240,7 +240,7 @@
           },
           'properties': {
             'icon': Drupal.Mapbox.icons[markerData.name]['marker'],
-            'nid': markerData.nid,
+            'popup_entity_id': markerData.popup_entity_id,
             'filter': setting.filter.enabled ? filter : false
           }
         });

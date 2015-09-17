@@ -29,7 +29,7 @@
               marker = e.popup._source;
             }
 
-            Drupal.MapboxContent.load('#custom-popup-id-' + marker._leaflet_id, marker, viewmode, settings, function($this){
+            Drupal.MapboxContent.load('#custom-popup-id-' + marker._leaflet_id, marker, settings, function($this){
               // check if we are handling a popup
               var $content = $('> div:first-child', $this);
 

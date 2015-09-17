@@ -78,3 +78,33 @@ function mapbox_views_ajax_remove_mapping($form, &$form_state) {
 function mapbox_views_ajax_add_mapping($form, &$form_state) {
   $form_state['view']->mapping++;
 }
+
+/**
+ * Implements hook_views_plugins().
+ */
+function mapbox_views_views_plugins() {
+  $path = drupal_get_path('module', 'mapbox_views') . '/views';
+  return array(
+    'module' => 'mapbox_views',
+    'style' => array(
+      'views_mapbox' => array(
+        'title' => t('Mapbox'),
+        'path' => $path . '/plugins',
+        'help' => t('Displays nodes on a mapbox.'),
+        'handler' => 'views_plugin_style_mapbox',
+        //'theme' => 'views_views_mapbox_style',
+        //'theme file' => 'views_views_mapbox_style.theme.inc',
+        //'theme path' => $path . '/theme',
+        //'additional themes' => $additional_themes,
+        'uses row plugin' => TRUE,
+        'uses fields' => TRUE,
+        'uses options' => TRUE,
+        'uses row class' => FALSE,
+        'type' => 'normal',
+        'help_topic' => 'style-mapbox',
+        'even empty' => TRUE,
+        'js' => array(),
+      ),
+    ),
+  );
+}

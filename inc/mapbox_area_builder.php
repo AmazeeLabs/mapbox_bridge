@@ -113,6 +113,18 @@ class MapboxAreaBuilder {
       $mapMarkers = $this->extractMarkersInfo($allEntityIds);
       $mapMarkers = $this->processMarkersSymbol($mapMarkers);
 
+    } else if (is_array($this->object)) {
+      // If the object is already an array, they we will just use it as it is.
+      // The $type will however default to 'json'.
+      // @todo: we should actually refactor this class so that we do not have so
+      // many conditionals here. If we need that kind of behavior, this should
+      // be handled with extending the class and overwriting the getMap().
+      // @todo: Also, the mapbox_bridge_render_map will again encode the data
+      // as json, so we can just pass a json directly here.
+      $type = 'json';
+      $mapMarkers = $this->object;
+      $mapMarkers = $this->processJsonMarkers($mapMarkers);
+
     } else if (is_string($this->object)) {
       $mapMarkers = file_get_contents(url($this->object, array('absolute' => TRUE)));
       $mapMarkers = json_decode($mapMarkers);

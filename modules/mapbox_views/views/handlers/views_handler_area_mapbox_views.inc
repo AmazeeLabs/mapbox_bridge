@@ -71,7 +71,6 @@ class views_handler_area_mapbox_views extends views_handler_area {
 
   function render($empty = FALSE) {
     if (!$empty || !empty($this->options['empty'])) {
-      module_load_include('php', 'mapbox_bridge', 'inc/mapbox_area_builder');
       try {
         $mapBuilder = new MapboxAreaBuilder(
           $this->view,

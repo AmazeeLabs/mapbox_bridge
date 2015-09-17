@@ -8,3 +8,4 @@ dependencies[] = geofield
 dependencies[] = entity
 
 files[] = inc/MapboxField.inc
+files[] = inc/mapbox_area_builder.php

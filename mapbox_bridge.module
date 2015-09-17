@@ -16,8 +16,8 @@ function mapbox_bridge_menu() {
 
   $items['mapbox_bridge_ajax_content'] = array (
     'page callback' => 'mapbox_bridge_ajax_content',
-    'page arguments' => array(1, 2),
-    'access arguments' => array('access content'),
+    'page arguments' => array(1, 2, 3),
+    'access arguments' => TRUE,
     'type' => MENU_CALLBACK
   );
 
@@ -27,12 +27,20 @@ function mapbox_bridge_menu() {
 /**
  * Custom function to load content
  * */
-function mapbox_bridge_ajax_content($viewmode, $nid) {
-  $node = entity_load_single('node', $nid);
-  $rendered = entity_view('node', array($node), $viewmode);
-
-  // dont "return" it or otherwise it will display the whole page
-  print render($rendered);
+function mapbox_bridge_ajax_content($entity_type, $viewmode, $entity_id) {
+  $entity = entity_load_single($entity_type, $entity_id);
+  if (entity_access('view', $entity_type, $entity)) {
+    $rendered = entity_view($entity_type, array($entity), $viewmode);
+    // Dont "return" it or otherwise it will display the whole page.
+    // @todo: in case we will need some fancy js to be loaded on the viewmode
+    // we have to refactor this to use the drupal ajax framework.
+    print render($rendered);
+    drupal_exit();
+  }
+  // If we are here, we have a 403 error. This is an ajax requst, so we will
+  // just print a simple message and exit.
+  print 'Access denied';
+  drupal_exit();
 }
 
 /**
@@ -67,6 +75,8 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
     global $_domain_variant;
     global $language;
 
+    // @todo: We really reall have to make these variables as lightweight as
+    // possible. They are injected directly into the html page.
     // add $map_id and token to javascript settings
     drupal_add_js(array('mapboxBridge' => array(
       'mapId' => $map_id,

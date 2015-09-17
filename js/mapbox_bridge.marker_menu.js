@@ -23,7 +23,7 @@
         link.setAttribute('id', 'menu-item-id-' + marker._leaflet_id);
 
         // load the specified contents into the navigation
-        Drupal.MapboxContent.load('#menu-item-id-' + marker._leaflet_id, marker, setting.mapboxBridge.marker_menu.viewmode, setting.mapboxBridge);
+        Drupal.MapboxContent.load('#menu-item-id-' + marker._leaflet_id, marker, setting);
 
         // Populate content from each markers object.
         link.innerHTML = marker.feature.properties.nid;
