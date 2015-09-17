@@ -55,7 +55,7 @@ function mapbox_views_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['name'],
         $conf['icon'],
         $conf['mapbox_max_zoom'],
-        array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode'])
+        array('enabled' => $conf['popup'], 'popup_viewmode' => $conf['popup_viewmode'], 'popup_event' => $conf['popup_event'])
       );
 
       // save to block content
@@ -170,6 +170,16 @@ function mapbox_views_pane_content_type_edit_form($form, &$form_state) {
         'input[name="popup"]' => array('checked' => FALSE),
       ),
     ),
+  );
+  $form['mapbox_marker']['popup_event'] = array(
+    '#type' => 'select',
+    '#title' => t('Event'),
+    '#options' => array(
+      'click' => t('Click'),
+      'click mouseover' => t('Hover'),
+    ),
+    '#description' => t('Event which displays the popup'),
+    '#default_value' => isset($conf['popup_event']) ? $conf['popup_event'] : 'click',
   );
   $form['mapbox_marker']['legend'] = array(
     '#type' => 'checkbox',
