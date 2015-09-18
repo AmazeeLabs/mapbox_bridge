@@ -17,7 +17,7 @@ function mapbox_bridge_menu() {
   $items['mapbox_bridge_ajax_content'] = array (
     'page callback' => 'mapbox_bridge_ajax_content',
     'page arguments' => array(1, 2, 3),
-    'access arguments' => TRUE,
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK
   );
 
