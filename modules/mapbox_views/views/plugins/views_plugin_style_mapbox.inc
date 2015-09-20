@@ -85,11 +85,7 @@ class views_plugin_style_mapbox extends views_plugin_style {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $fields = $this->display->handler->get_option('fields');
-    $field_options = array();
-    foreach ($fields as $field_name => $field) {
-      $field_options[$field_name] = $field['label'];
-    }
+    $field_options = $this->display->handler->get_field_labels(TRUE);
     $form['location_field'] = array(
       '#type' => 'select',
       '#title' => t('Location field'),
