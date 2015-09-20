@@ -262,29 +262,36 @@ class views_plugin_style_mapbox extends views_plugin_style {
    */
   function render() {
     // @todo: add some basic errors handling maybe?
-    parent::render();
     $display_fields = $this->display->handler->get_option('fields');
     $marker_points = array();
     foreach ($this->view->result as $key => $row) {
-      $field_value = filter_xss($this->get_field($key, $this->options['location_field']));
-      $matches = array();
-      preg_match_all('/POINT\ \([0-9\.-]+\ [0-9\.-]+\)/', $field_value, $matches);
-      if (!empty($matches[0])) {
-        foreach ($matches[0] as $point) {
-          $marker = new stdClass();
-          list($marker->lon, $marker->lat) = $this->extract_point_coordinates($point);
-          $marker_points[] = $marker;
-          // Add the rest of the fields to the marker.
-          foreach ($display_fields as $field_key => $value) {
-            // Skip the fields which should be excluded from the display, or if it
-            // is the location field.
-            if (!empty($value['exclude']) || $field_key == $this->options['location_field']) {
-              continue;
+      $row_field_value = $this->get_field_value($key, $this->options['location_field']);
+      if (empty($row_field_value)) {
+        continue;
+      }
+      if (is_string($row_field_value)) {
+        $row_field_value = array($row_field_value);
+      }
+      foreach($row_field_value as $field_value) {
+        $matches = array();
+        preg_match_all('/POINT\ \([0-9\.-]+\ [0-9\.-]+\)/', $field_value, $matches);
+        if (!empty($matches[0])) {
+          foreach ($matches[0] as $point) {
+            $marker = new stdClass();
+            list($marker->lon, $marker->lat) = $this->extract_point_coordinates($point);
+            $marker_points[] = $marker;
+            // Add the rest of the fields to the marker.
+            foreach ($display_fields as $field_key => $value) {
+              // Skip the fields which should be excluded from the display, or if it
+              // is the location field.
+              if (!empty($value['exclude']) || $field_key == $this->options['location_field']) {
+                continue;
+              }
+              $marker->{$field_key} = $this->get_field_value($key, $field_key);
             }
-            $marker->{$field_key} = filter_xss($this->get_field($key, $field_key));
-          }
-          if (!empty($this->options['marker_field'])) {
-            $marker->popup_entity_id = $marker->{$this->options['marker_field']};
+            if (!empty($this->options['marker_field'])) {
+              $marker->popup_entity_id = $marker->{$this->options['marker_field']};
+            }
           }
         }
       }
