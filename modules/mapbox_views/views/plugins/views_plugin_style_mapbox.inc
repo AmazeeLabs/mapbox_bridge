@@ -265,14 +265,26 @@ class views_plugin_style_mapbox extends views_plugin_style {
     $display_fields = $this->display->handler->get_option('fields');
     $marker_points = array();
     foreach ($this->view->result as $key => $row) {
-      $row_field_value = $this->get_field_value($key, $this->options['location_field']);
-      if (empty($row_field_value)) {
+      $row_field_values = $this->get_field_value($key, $this->options['location_field']);
+      if (empty($row_field_values)) {
         continue;
       }
-      if (is_string($row_field_value)) {
-        $row_field_value = array($row_field_value);
+      if (is_string($row_field_values)) {
+        $row_field_values = array($row_field_values);
       }
-      foreach($row_field_value as $field_value) {
+      foreach($row_field_values as $row_field_value) {
+        // The $field_value may be a geofield, in which case we check the 'geom'
+        // attribute.
+        if (is_array($row_field_value) && isset($row_field_value['geom'])) {
+          $field_value = $row_field_value['geom'];
+        }
+        elseif (is_string($row_field_value)) {
+          $field_value = $row_field_value;
+        } else {
+          // If the value is not a string and not a geofield, then we skip it.
+          watchdog('mapbox_views', 'The "!location_field" value is not a string or a geofield, so it cannot be shown on the map.', array('!location_field' => $this->options['location_field']), WATCHDOG_ERROR);
+          continue;
+        }
         $matches = array();
         preg_match_all('/POINT\ \([0-9\.-]+\ [0-9\.-]+\)/', $field_value, $matches);
         if (!empty($matches[0])) {
