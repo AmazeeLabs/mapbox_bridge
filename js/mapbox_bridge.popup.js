@@ -16,7 +16,9 @@
         // setup a minimum with for the popup, see http://leafletjs.com/reference.html#popup for other options
         layer.bindPopup(content, {
           minWidth: 150,
-          className: 'popup-nid-' + layer.feature.properties.nid
+          className: 'popup-nid-' + layer.feature.properties.popup_entity_id
+        }).on('mouseover', function(){
+          layer.openPopup();
         });
 
         Drupal.Mapbox.map.on('popupopen', function(e) {
@@ -24,12 +26,7 @@
 
           $('#custom-popup-id-' + layer._leaflet_id).once(function(){
 
-            // get the marker
-            if (typeof e.popup._source != 'undefined') {
-              marker = e.popup._source;
-            }
-
-            Drupal.MapboxContent.load('#custom-popup-id-' + marker._leaflet_id, marker, settings, function($this){
+            Drupal.MapboxContent.load('#custom-popup-id-' + layer._leaflet_id, e.popup._source.feature.properties.popup_entity_id, settings, function($this){
               // check if we are handling a popup
               var $content = $('> div:first-child', $this);
 
@@ -46,14 +43,11 @@
                 });
 
               // center the newly clicked marker
-              var px = Drupal.Mapbox.map.project(marker._latlng); // find the pixel location on the map where the popup anchor is
-              px.y -= marker._popup._container.clientHeight / 2; // find the height of the popup container, divide by 2, subtract from the Y axis of marker location
+              if (e.type == 'click') {
+                var px = Drupal.Mapbox.map.project(e.target._latlng); // find the pixel location on the map where the popup anchor is
+                px.y -= e.target._popup._container.clientHeight / 2; // find the height of the popup container, divide by 2, subtract from the Y axis of marker location
 
-              // panTo
-              if (settings.popup.panTo) {
-                Drupal.Mapbox.map.panTo( marker.getLatLng() );
-              } else {
-                Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px) );
+                Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px), { animate: true }); // pan to new center
               }
             });
           });
