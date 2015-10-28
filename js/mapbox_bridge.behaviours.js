@@ -64,7 +64,7 @@
       if (setting.mapboxBridge.cluster) {
 
         // create clusterGroup and add it to the map
-        var clusterGroup = new L.MarkerClusterGroup().addTo(Drupal.Mapbox.layerGroup);
+        var clusterGroup = new L.MarkerClusterGroup({showCoverageOnHover: false}).addTo(Drupal.Mapbox.layerGroup);
 
         // add the featureLayer containing all the markers to the clusterGroup (so clustering happens)
         Drupal.Mapbox.featureLayer.addTo(clusterGroup);
