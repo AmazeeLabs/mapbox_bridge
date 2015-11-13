@@ -15,7 +15,7 @@
 
         // setup a minimum with for the popup, see http://leafletjs.com/reference.html#popup for other options
         layer.bindPopup(content, {
-          minWidth: 150,
+          minWidth: 200,
           className: 'popup-nid-' + layer.feature.properties.popup_entity_id
         }).on('mouseover', function(){
           layer.openPopup();
