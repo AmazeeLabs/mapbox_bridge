@@ -166,6 +166,7 @@
           Drupal.Mapbox.icons[markerData.name] = {
             name: markerData.name,
             iconUrl: markerData.icon,
+            tid: markerData.tid,
             marker: {
               'iconUrl': markerData.icon,
               'iconSize': [markerData.iconWidth, markerData.iconHeight],
@@ -264,7 +265,7 @@
         if (legend.iconUrl && legend.name) {
           $('<li class="legend">' +
             '<div class="legend-icon"><img src="' + legend.iconUrl + '"></div>' +
-            '<div class="legend-name">' + legend.name + '</div>' +
+            '<div class="legend-name"><a href="about-us/sales-network-offices?f[0]=field_office_type:' + legend.tid + '">' + legend.name + '</a></div>' +
           '</li>').appendTo('.mapbox-legend .legends');
         }
       });
