@@ -260,15 +260,41 @@
       // add legend container
       $('<div id="mapbox-legend" class="mapbox-legend"><ul class="legends"></ul></div>').insertAfter('#map');
 
-      // loop through the stored icons
+      // re-order the icons
+      var icons = {
+        0: '',
+        1: '',
+        2: '',
+        3: ''
+      };
+
       $.each(Drupal.Mapbox.icons, function(i, legend){
+
+        if (legend.tid == 4)
+          icons[0] = legend;
+
+        if (legend.tid == 6)
+          icons[1] = legend;
+
+        if (legend.tid == 5)
+          icons[2] = legend;
+
+        if (legend.tid ==55)
+          icons[3] = legend;
+      });
+
+      // save it back
+      Drupal.Mapbox.icons = icons;
+
+      // loop through the stored icons
+      $.each(Drupal.Mapbox.icons, function(i, legend) {
         if (legend.iconUrl && legend.name) {
           $('<li class="legend">' +
             '<div class="legend-icon"><img src="' + legend.iconUrl + '"></div>' +
             '<div class="legend-name"><a href="/' + Drupal.settings.mapboxBridge.path_settings.language + '/about-us/sales-network-offices?f[0]=field_office_type:' + legend.tid + '">' + legend.name + '</a></div>' +
-          '</li>').appendTo('.mapbox-legend .legends');
+            '</li>').appendTo('.mapbox-legend .legends');
         }
-      });
+      })
     },
     // end Drupal.behaviors.mapboxBridge.addLegend
 
