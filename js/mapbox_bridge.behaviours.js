@@ -294,7 +294,17 @@
             '<div class="legend-name"><a href="/' + Drupal.settings.mapboxBridge.path_settings.language + '/about-us/sales-network-offices?f[0]=field_office_type:' + legend.tid + '">' + legend.name + '</a></div>' +
             '</li>').appendTo('.mapbox-legend .legends');
         }
-      })
+      });
+
+      $('.legend a').each(function(){
+        var $this = $(this);
+
+        $this.on('mouseover', function(){
+          $this.parents('.legend').addClass('hover');
+        }).on('mouseout', function(){
+          $this.parents('.legend').removeClass('hover');
+        });
+      });
     },
     // end Drupal.behaviors.mapboxBridge.addLegend
 
