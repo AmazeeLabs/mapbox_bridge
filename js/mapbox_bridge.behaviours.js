@@ -25,11 +25,22 @@
 
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
-            if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
-              $.when(Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting)).done(function(){
-                Drupal.behaviors.mapboxBridge.alter();
-              });
-            }
+
+            // Run initialization asynchronously so that "load" is fully done.
+            // Otherwise Leaflet.markercluster event handlers are attached twice
+            // (somewhere deep in the async callback hell) and this causes
+            // issues. For example, the _zoomOrSpiderfy() handler is called two
+            // times on a cluster click. On the first call it triggers map zoom,
+            // and the second call tries to spiderify cluster, but the map is in
+            // the zooming progress, not all properties are available, and that
+            // produces an incorrect behavior.
+            setTimeout(function() {
+              if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
+                $.when(Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting)).done(function () {
+                  Drupal.behaviors.mapboxBridge.alter();
+                });
+              }
+            }, 0);
           });
         });
       }
@@ -66,7 +77,10 @@
         // create clusterGroup and add it to the map
         var clusterGroup = new L.MarkerClusterGroup({
           showCoverageOnHover: false,
-          maxClusterRadius: 20
+          maxClusterRadius: 20,
+          // Make spider legs a bit longer so that markers do not overlap the
+          // cluster icon.
+          spiderfyDistanceMultiplier: 2.5
         }).addTo(Drupal.Mapbox.layerGroup);
 
         // add the featureLayer containing all the markers to the clusterGroup (so clustering happens)
