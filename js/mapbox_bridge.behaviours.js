@@ -275,12 +275,7 @@
       $('<div id="mapbox-legend" class="mapbox-legend"><ul class="legends"></ul></div>').insertAfter('#map');
 
       // re-order the icons
-      var icons = {
-        0: '',
-        1: '',
-        2: '',
-        3: ''
-      };
+      var icons = {};
 
       $.each(Drupal.Mapbox.icons, function(i, legend){
 
@@ -293,8 +288,11 @@
         if (legend.tid == 5)
           icons[2] = legend;
 
-        if (legend.tid ==55)
+        if (legend.tid == 55)
           icons[3] = legend;
+
+        if (legend.tid == 273)
+          icons[4] = legend;
       });
 
       // save it back
