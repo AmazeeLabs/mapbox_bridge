@@ -275,24 +275,24 @@
       $('<div id="mapbox-legend" class="mapbox-legend"><ul class="legends"></ul></div>').insertAfter('#map');
 
       // re-order the icons
-      var icons = {};
+      var icons = [];
 
       $.each(Drupal.Mapbox.icons, function(i, legend){
 
         if (legend.tid == 4)
-          icons[0] = legend;
+          icons.splice(0, 0, legend)
 
         if (legend.tid == 6)
-          icons[1] = legend;
+          icons.splice(1, 0, legend)
 
         if (legend.tid == 5)
-          icons[2] = legend;
+          icons.splice(2, 0, legend)
 
         if (legend.tid == 55)
-          icons[3] = legend;
+          icons.splice(3, 0, legend)
 
-        if (legend.tid == 273)
-          icons[4] = legend;
+        if (legend.tid != 4 && legend.tid != 6 && legend.tid != 5 && legend.tid != 55)
+          icons.push(legend);
       });
 
       // save it back
