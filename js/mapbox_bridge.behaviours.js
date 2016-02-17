@@ -303,7 +303,7 @@
         if (legend.iconUrl && legend.name) {
           $('<li class="legend">' +
             '<div class="legend-icon"><img src="' + legend.iconUrl + '"></div>' +
-            '<div class="legend-name"><a href="/' + Drupal.settings.mapboxBridge.path_settings.language + '/about-us/sales-network-offices?f[0]=field_office_type:' + legend.tid + '">' + legend.name + '</a></div>' +
+            '<div class="legend-name"><a href="/' + Drupal.settings.mapboxBridge.path_settings.language + '/about-us/sales-network-offices?f[0]=field_office_type%3A' + legend.tid + '">' + legend.name + '</a></div>' +
             '</li>').appendTo('.mapbox-legend .legends');
         }
       });
