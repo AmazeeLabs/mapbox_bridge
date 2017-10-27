@@ -31,8 +31,17 @@ function mapbox_bridge_ajax_content($viewmode, $nid) {
   $node = entity_load_single('node', $nid);
   $rendered = entity_view('node', array($node), $viewmode);
 
+  // SIG-777: After loads of digging into domain configuration we couldn't find
+  // anything that would provoke this behaviour, so we 'just' fix it when it
+  // happens. At the moment we only found this issue with 'de/de-de' but we
+  // just need to add more patterns if needed
+  $patterns = array(
+    '/de/de/de-de/' => '/de/de-de/'
+  );
+  $output = str_replace(array_keys($patterns), array_values($patterns), render($rendered));
+
   // dont "return" it or otherwise it will display the whole page
-  print render($rendered);
+  print $output;
 }
 
 /**
