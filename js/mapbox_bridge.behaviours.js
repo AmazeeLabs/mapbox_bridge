@@ -51,6 +51,14 @@
      * Initialize base settings
      * */
     init: function(data, context, setting) {
+      // add custom styles
+      var mapboxTiles = L.tileLayer('https://api.mapbox.com/styles/v1/amazee/cjdacyxh23tbl2rrw7mipzf1i/tiles/256/{z}/{x}/{y}'
+        + '?access_token=' + L.mapbox.accessToken, {
+        attribution: '© ' + (new Date()).getFullYear() + ' u-blox'
+      });
+
+      Drupal.Mapbox.map.addLayer(mapboxTiles);
+
       // add markers
       $.each(data, function(index, markerData){
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
