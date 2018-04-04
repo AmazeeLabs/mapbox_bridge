@@ -50,39 +50,15 @@ function mapbox_bridge_ajax_content($viewmode, $nid) {
  * */
 function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE) {
   if ($map_id && $type) {
-    // Defaults
-    $mapbox_version = '2.1.7';
-    $leaflet_version = '0.4.0';
-
-    // Overrides
-    if (!empty($_GET['mapbox'])) {
-      $mapbox_version_tmp = $_GET['mapbox'];
-      $f = file_get_contents('https://api.tiles.mapbox.com/mapbox.js/v' . $mapbox_version_tmp . '/mapbox.js');
-      if ($f) {
-        $mapbox_version = $mapbox_version_tmp;
-      }
-    }
-
-    if (!empty($_GET['leaflet']) && $_GET['leaflet'] == '1.0.0') {
-      $leaflet_version = $_GET['leaflet'];
-    }
-
-    if (!empty($_GET['mapbox']) || !empty($_GET['leaflet'])) {
-      drupal_set_message(t('Using these versions for mapbox: %mapbox and leaflet: %leaflet', array(
-        '%mapbox' => $mapbox_version,
-        '%leaflet' => $leaflet_version,
-      )));
-    }
-
     // add mapbox.js files
-    drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v' . $mapbox_version . '/mapbox.js', 'external');
-    drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v' . $mapbox_version . '/mapbox.css', 'external');
+    drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
+    drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css', 'external');
 
     // cluster files
     if ($cluster) {
-      drupal_add_js('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v' . $leaflet_version . '/leaflet.markercluster.js', 'external');
-      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v' . $leaflet_version . '/MarkerCluster.css', 'external');
-      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v' . $leaflet_version . '/MarkerCluster.Default.css', 'external');
+      drupal_add_js('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js', 'external');
+      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css', 'external');
+      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css', 'external');
     }
 
     // add chosen library
