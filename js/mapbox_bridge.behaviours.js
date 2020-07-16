@@ -40,6 +40,9 @@
      * Initialize base settings
      * */
     init: function(data, context, setting) {
+      // refresh any current data
+      Drupal.behaviors.mapboxBridge.refresh()
+
       // add markers
       $.each(data, function(index, markerData){
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
@@ -331,6 +334,16 @@
       }
 
       return [offsetX, offsetY];
+    },
+
+    /**
+     * refresh the map
+     */
+    refresh: function(){
+      Drupal.Mapbox.icons = {};
+      Drupal.Mapbox.layers = {};
+      Drupal.Mapbox.filters = {};
+      Drupal.Mapbox.geojson = [];
     },
 
     /**
