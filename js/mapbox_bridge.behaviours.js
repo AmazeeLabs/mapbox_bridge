@@ -41,7 +41,7 @@
      * */
     init: function(data, context, setting) {
       // refresh any current data
-      Drupal.behaviors.mapboxBridge.refresh()
+      Drupal.behaviors.mapboxBridge.refresh();
 
       // add markers
       $.each(data, function(index, markerData){
