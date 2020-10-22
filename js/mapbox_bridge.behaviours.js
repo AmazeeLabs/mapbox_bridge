@@ -13,24 +13,29 @@
    */
   Drupal.behaviors.mapboxBridge = {
     attach: function(context, setting) {
-      if (typeof L != 'undefined' && $('#map', context).length) {
+      console.log(mapboxgl);
+      if (typeof mapboxgl != 'undefined' && $('#map', context).length) {
         $('#map', context).once('mapbox-bridge', function(){
 
           // access token for mapbox
-          L.mapbox.accessToken = setting.mapboxBridge.publicToken;
+          mapboxgl.accessToken = setting.mapboxBridge.publicToken;
 
           // Load Mapbox with supplied ID
-          Drupal.Mapbox.map = L.mapbox.map('map', setting.mapboxBridge.mapId);
-          Drupal.Mapbox.map.scrollWheelZoom.disable();
-
-          // Wait until Mapbox is loaded
-          Drupal.Mapbox.map.on('load', function() {
-            if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
-              $.when(Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting)).done(function(){
-                Drupal.behaviors.mapboxBridge.alter();
-              });
-            }
+          Drupal.Mapbox.map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/streets-v11', // style URL
           });
+
+          Drupal.Mapbox.map.scrollZoom.disable();
+
+          // // Wait until Mapbox is loaded
+          // Drupal.Mapbox.map.on('load', function() {
+          //   if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
+          //     $.when(Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting)).done(function(){
+          //       Drupal.behaviors.mapboxBridge.alter();
+          //     });
+          //   }
+          // });
         });
       }
     },
