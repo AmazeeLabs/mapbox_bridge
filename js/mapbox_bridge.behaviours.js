@@ -153,21 +153,23 @@
         Drupal.Mapbox.geojson.forEach(function(marker, index){
           bounds.extend(marker.geometry.coordinates);
         })
-        console.log(bounds);
         Drupal.Mapbox.map.fitBounds(bounds, { maxZoom: setting.mapboxBridge.maxZoom });
       }
 
       // add the legend if necessary
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.legend) {
         Drupal.behaviors.mapboxBridge.addLegend(setting, data);
       }
 
       // create the popups
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.popup.enabled) {
         Drupal.MapboxPopup.load(Drupal.Mapbox.map, 'unclustered-point', setting.mapboxBridge);
       }
 
       // create filters
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.filter.enabled) {
         Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
       }
@@ -184,6 +186,8 @@
 
       // enable proximity search
       if (setting.mapboxBridge.proximity.enabled) {
+        // TODO: This will not work in the current version
+        // See: https://docs.mapbox.com/mapbox-gl-js/example/mapbox-gl-geocoder/
         Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
           autocomplete: true
         }));

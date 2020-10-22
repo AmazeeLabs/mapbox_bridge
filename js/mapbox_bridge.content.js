@@ -7,11 +7,9 @@
     load: function(target, entity_id, settings, onComplete) {
       var path = this.createPath(settings, entity_id);
       // load the node with the supplied viewmode
-      console.log(path);
-      console.log(target,$(target));
+
       $(target).load(path, function(content){
         var $this = $(this);
-        console.log('loaded');
 
         // remove loading indicator
         $this.removeClass('loading');
