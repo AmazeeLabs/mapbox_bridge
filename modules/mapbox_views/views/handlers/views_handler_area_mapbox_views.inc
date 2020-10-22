@@ -272,7 +272,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $form['mapbox_type']['custom_icon_src'] = array(
       '#type' => 'textfield',
       '#title' => t('Local path'),
-      '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin'),
+      '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin') . "<br><strong>".t('Currently only supports PNG or JPEG.')."</strong>",
       '#default_value' => $this->options['mapbox_type']['custom_icon_src'],
       '#states' => array(
         'invisible' => array(

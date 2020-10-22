@@ -19,20 +19,19 @@
 
           // access token for mapbox
           mapboxgl.accessToken = setting.mapboxBridge.publicToken;
-          console.log(setting.mapboxBridge.publicToken);
-
 
           // Load Mapbox with supplied ID
           Drupal.Mapbox.map = new mapboxgl.Map({
             container: 'map', // container id
-            style: 'mapbox://styles/mapbox/streets-v11', // style URL
+            style: setting.mapboxBridge.style,
           });
 
           // disable some scroll/touch/drag features
           Drupal.Mapbox.map.scrollZoom.disable();
           Drupal.Mapbox.map.dragRotate.disable();
           Drupal.Mapbox.map.touchZoomRotate.disableRotation();
-          // in zoom controls
+
+          // add in zoom controls
           var nav = new mapboxgl.NavigationControl({
             showCompass: false,
             showZoom: true
@@ -61,6 +60,7 @@
 
       // // add markers
       $.each(data, function(index, markerData){
+        console.log(markerData);
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
       });
 
@@ -118,32 +118,27 @@
         }
       });
 
-      // unclustered style
-      Drupal.Mapbox.map.addLayer({
-        id: 'unclustered-point',
-        type: 'circle',
-        source: 'marker-data',
-        filter: ['!', ['has', 'point_count']],
-        paint: {
-          'circle-color': '#11b4da',
-          'circle-radius': 4,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#fff'
-        }
+      // unclustered style with custom icons images
+      var imageURL = "https://api.mapbox.com/v4/marker/pin-m.png?access_token=" + mapboxgl.accessToken;
+      if(typeof data[0] !== 'undefined' && data[0].icon){
+        imageURL = data[0].icon;
+      }
+      Drupal.Mapbox.map.loadImage(imageURL, function(error, image) { //this is where we load the image file
+        if (error) throw error;
+        Drupal.Mapbox.map.addImage("marker-image", image); //this is where we name the image file we are loading
+        Drupal.Mapbox.map.addLayer({
+          id: 'unclustered-point',
+          type: 'symbol',
+          source: 'marker-data',
+          filter: ['!', ['has', 'point_count']],
+          'layout': {
+            "icon-image": "marker-image", // the name of image file we used above
+            "icon-allow-overlap": false,
+            "icon-size": settings.mapboxBridge.iconMultiplier //this is a multiplier applied to the standard size. So if you want it half the size put ".5"
+          }
+        });
       });
 
-      // // Set a custom icon on each marker based on feature properties.
-      // Drupal.Mapbox.map.on('layeradd', function(e) {
-      //   var marker = e.layer,
-      //       feature = marker.feature;
-      //
-      //   if (typeof feature != 'undefined') {
-      //     marker.setIcon(L.icon(feature.properties.icon));
-      //   }
-      // });
-      //
-      // // wrap everything in a layerGroup
-      // Drupal.Mapbox.layerGroup = L.layerGroup();
 
       //
       // // add the layerGroup to the map
@@ -213,53 +208,7 @@
     * Build marker geojson
     * */
     addMarker: function(markerData, setting) {
-      // for custom icons provided by drupal
-      if (markerData.icon) {
-        if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
-
-          // Calculate Icon's anchor position based on size and user preferences
-          var iconAnchorPosition = Drupal.behaviors.mapboxBridge.getIconAnchor(
-            markerData.iconWidth,
-            markerData.iconHeight,
-            setting.markerAnchor
-          );
-
-          // Calculate popup anchor position to be 3px above the marker and
-          // always centered on top of the icon
-          var popupAnchor = [
-            markerData.iconWidth / 2 - parseFloat(iconAnchorPosition[0]),
-            -(parseFloat(iconAnchorPosition[1]) + 3)
-          ];
-
-          // create an icon
-          Drupal.Mapbox.icons[markerData.name] = {
-            name: markerData.name,
-            iconUrl: markerData.icon,
-            marker: {
-              'iconUrl': markerData.icon,
-              'iconSize': [markerData.iconWidth, markerData.iconHeight],
-              'iconAnchor': iconAnchorPosition,
-              'popupAnchor': popupAnchor,
-              'className': 'custom-marker' + (setting.popup.enabled ? ' clickable' : '')
-            }
-          };
-        }
-
-      // for icons based on mapbox
-      } else if (typeof markerData.type != 'undefined') {
-
-        if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
-          Drupal.Mapbox.icons[markerData.name] = {
-            name: markerData.name,
-            marker: {
-              'marker-symbol': markerData.type,
-              iconUrl: 'https://api.mapbox.com/v4/marker/pin-m.png?access_token=' + mapboxgl.accessToken
-            }
-          };
-        }
-      }
-
-      if (markerData.lat && markerData.lon && typeof Drupal.Mapbox.icons[markerData.name]['marker'] != 'undefined') {
+      if (markerData.lat && markerData.lon) {
         // setup the filter properties
         if (setting.filter.enabled) {
 
@@ -311,7 +260,6 @@
             'coordinates': [markerData.lon, markerData.lat]
           },
           'properties': {
-            'icon': Drupal.Mapbox.icons[markerData.name]['marker'],
             'popup_entity_id': markerData.popup_entity_id,
             'filter': setting.filter.enabled ? filter : false
           }

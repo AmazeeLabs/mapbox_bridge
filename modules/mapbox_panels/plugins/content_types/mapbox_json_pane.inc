@@ -211,7 +211,7 @@ function mapbox_json_pane_content_type_edit_form($form, &$form_state) {
   $form['mapbox_type']['custom_icon_src'] = array(
     '#type' => 'textfield',
     '#title' => t('Local path'),
-    '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin'),
+    '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin') . "<br><strong>".t('Currently only supports PNG or JPEG.')."</strong>",
     '#default_value' => $conf['custom_icon_src'],
     '#states' => array(
       'invisible' => array(

@@ -99,6 +99,8 @@ function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false
       'cluster' => $cluster,
       'clusterMaxZoom' => 14,
       'clusterRadius' => 50,
+      'iconMultiplier' => 0.5,
+      'style' => 'mapbox://styles/mapbox/light-v10',
       'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
       'center' => $center,
       'marker_menu' => array('enabled' => $marker_menu, 'viewmode' => $menu_viewmode),

@@ -225,7 +225,7 @@ class views_plugin_style_mapbox extends views_plugin_style {
     $form['marker_icon_src'] = array(
       '#type' => 'textfield',
       '#title' => t('Custom icon'),
-      '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin'),
+      '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin') . "<br><strong>".t('Currently only supports PNG or JPEG.')."</strong>",
       '#default_value' => $this->options['marker_icon_src'],
       '#required' => TRUE,
     );
