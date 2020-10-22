@@ -6,58 +6,26 @@
    * @see http://leafletjs.com/reference.html#popup
    */
   Drupal.MapboxPopup = {
-    popups: function (layers, viewmode, settings) {
-      // go through each group, then through each layer
-      layers.eachLayer(function(layer) {
+    load: function (map, layerName, settings){
+      map.on('click', layerName, function (e) {
+        var coordinates = e.features[0].geometry.coordinates.slice();
+        var entityId = e.features[0].properties.popup_entity_id;
+        var className = 'custom-popup-id-' + entityId;
 
-        // This is an empty container that we will replace via ajax
-        var content = '<div class="custom-popup-content loading" id="custom-popup-id-' + layer._leaflet_id + '"><\/div>';
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
 
-        // setup a minimum with for the popup, see http://leafletjs.com/reference.html#popup for other options
-        layer.bindPopup(content, {
-          minWidth: 150,
-          className: 'popup-nid-' + layer.feature.properties.nid
-        });
+        new mapboxgl.Popup({
+          className: 'custom-popup-content loading ' + className,
+          anchor: 'bottom-left',
+        }).setLngLat(coordinates)
+          .setHTML('')
+          .addTo(map);
 
-        Drupal.Mapbox.map.on('popupopen', function(e) {
-          Drupal.MapboxPopup.activePopup = e;
-
-          $('#custom-popup-id-' + layer._leaflet_id).once(function(){
-
-            // get the marker
-            if (typeof e.popup._source != 'undefined') {
-              marker = e.popup._source;
-            }
-
-            Drupal.MapboxContent.load('#custom-popup-id-' + marker._leaflet_id, marker, settings, function($this){
-              // check if we are handling a popup
-              var $content = $('> div:first-child', $this);
-
-              // gracefully slide in the content
-              $content
-                .css({
-                  width: $this.width() + 'px', // to fix jQuery's jumpy sliding effect
-                  opacity: 0
-                })
-                .slideDown('fast').after(function(){
-                  $content.animate({
-                    opacity: 1
-                  }, 'normal');
-                });
-
-              // center the newly clicked marker
-              var px = Drupal.Mapbox.map.project(marker._latlng); // find the pixel location on the map where the popup anchor is
-              px.y -= marker._popup._container.clientHeight / 2; // find the height of the popup container, divide by 2, subtract from the Y axis of marker location
-
-              // panTo
-              if (settings.popup.panTo) {
-                Drupal.Mapbox.map.panTo( marker.getLatLng() );
-              } else {
-                Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px) );
-              }
-            });
-          });
-        });
+        setTimeout(function (){
+          Drupal.MapboxContent.load('.'+className, entityId, settings);
+        },500);
       });
     }
   };

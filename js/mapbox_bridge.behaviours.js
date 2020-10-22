@@ -1,24 +1,25 @@
 (function ($) {
 
   Drupal.Mapbox = {};
+  Drupal.Mapbox.defaultIcon = '';
   Drupal.Mapbox.icons = {};
   Drupal.Mapbox.layers = {};
   Drupal.Mapbox.filters = {};
   Drupal.Mapbox.geojson = [];
-  Drupal.Mapbox.featureLayer;
-  Drupal.Mapbox.layerGroup;
+  Drupal.Mapbox.sourceData;
+  Drupal.Mapbox.layerData;
 
   /**
    * Mapbox with very basic setup
    */
   Drupal.behaviors.mapboxBridge = {
     attach: function(context, setting) {
-      console.log(mapboxgl);
       if (typeof mapboxgl != 'undefined' && $('#map', context).length) {
         $('#map', context).once('mapbox-bridge', function(){
 
           // access token for mapbox
           mapboxgl.accessToken = setting.mapboxBridge.publicToken;
+          Drupal.Mapbox.defaultIcon = "https://api.mapbox.com/v4/marker/pin-m.png?access_token=" + mapboxgl.accessToken;
 
           // Load Mapbox with supplied ID
           Drupal.Mapbox.map = new mapboxgl.Map({
@@ -60,7 +61,6 @@
 
       // // add markers
       $.each(data, function(index, markerData){
-        console.log(markerData);
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
       });
 
@@ -76,6 +76,7 @@
           features: Drupal.Mapbox.geojson
         }
       });
+      Drupal.Mapbox.sourceData = Drupal.Mapbox.map.getSource('marker-data');
 
       // clustered layer styles
       Drupal.Mapbox.map.addLayer({
@@ -119,7 +120,7 @@
       });
 
       // unclustered style with custom icons images
-      var imageURL = "https://api.mapbox.com/v4/marker/pin-m.png?access_token=" + mapboxgl.accessToken;
+      var imageURL = Drupal.Mapbox.defaultIcon // default
       if(typeof data[0] !== 'undefined' && data[0].icon){
         imageURL = data[0].icon;
       }
@@ -134,32 +135,30 @@
           'layout': {
             "icon-image": "marker-image", // the name of image file we used above
             "icon-allow-overlap": false,
-            "icon-size": settings.mapboxBridge.iconMultiplier //this is a multiplier applied to the standard size. So if you want it half the size put ".5"
+            "icon-size": setting.mapboxBridge.iconMultiplier //this is a multiplier applied to the standard size. So if you want it half the size put ".5"
           }
         });
+        Drupal.Mapbox.layerData = Drupal.Mapbox.map.getLayer('unclustered-point');
       });
 
 
-      //
-      // // add the layerGroup to the map
-      // Drupal.Mapbox.layerGroup.addTo(Drupal.Mapbox.map);
-      //
-      // // set the pan & zoom of them map
+      // set the pan & zoom of them map
       // if (setting.mapboxBridge.center) {
       //   Drupal.Mapbox.map.setView(setting.mapboxBridge.center.split(','), setting.mapboxBridge.maxZoom);
       // } else {
       //   Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
       // }
       //
-      // // add the legend if necessary
-      // if (setting.mapboxBridge.legend) {
-      //   Drupal.behaviors.mapboxBridge.addLegend(setting, data);
-      // }
-      //
-      // // create the popups
-      // if (setting.mapboxBridge.popup.enabled) {
-      //   Drupal.MapboxPopup.popups(Drupal.Mapbox.featureLayer, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
-      // }
+      // add the legend if necessary
+      if (setting.mapboxBridge.legend) {
+        Drupal.behaviors.mapboxBridge.addLegend(setting, data);
+      }
+
+      // create the popups
+      if (setting.mapboxBridge.popup.enabled) {
+        // Drupal.MapboxPopup.popups(Drupal.Mapbox.sourceData, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
+        Drupal.MapboxPopup.load(Drupal.Mapbox.map, 'unclustered-point', setting.mapboxBridge);
+      }
       //
       // // create filters
       // if (setting.mapboxBridge.filter.enabled) {
@@ -171,37 +170,37 @@
       //   Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
       // }
       //
-      // // check for touch devices and disable pan and zoom
-      // if ('ontouchstart' in document.documentElement) {
-      //   Drupal.behaviors.mapboxBridge.panAndZoom(false);
-      // }
-      //
-      // // enable proximity search
-      // if (setting.mapboxBridge.proximity.enabled) {
-      //   Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
-      //     autocomplete: true
-      //   }));
-      //
-      //   // place the proximity wrapper at the top
-      //   $('<div id="mapbox-proximity" class="mapbox-proximity"><h3>' + setting.mapboxBridge.proximity.label + '</h3></div>').prependTo($('#map').parent());
-      //
-      //   // move the proximity search from inside the mapbox to the top
-      //   $('.leaflet-control-mapbox-geocoder').appendTo('#mapbox-proximity');
-      //
-      //   // change the behaviour of the proximity search
-      //   var $resultsContainer = $('.leaflet-control-mapbox-geocoder-results');
-      //   $resultsContainer.bind("DOMSubtreeModified propertychange",function(){
-      //     $resultsContainer.find('a').once(function(){
-      //       $(this).on('click', function(){
-      //         $resultsContainer.hide();
-      //       });
-      //     });
-      //   });
-      //
-      //   $('.leaflet-control-mapbox-geocoder-form input[type=text]').attr('placeholder', Drupal.t('Search')).on('focus', function(){
-      //     $resultsContainer.show();
-      //   });
-      // }
+      // check for touch devices and disable pan and zoom
+      if ('ontouchstart' in document.documentElement) {
+        Drupal.behaviors.mapboxBridge.panAndZoom(false);
+      }
+
+      // enable proximity search
+      if (setting.mapboxBridge.proximity.enabled) {
+        Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
+          autocomplete: true
+        }));
+
+        // place the proximity wrapper at the top
+        $('<div id="mapbox-proximity" class="mapbox-proximity"><h3>' + setting.mapboxBridge.proximity.label + '</h3></div>').prependTo($('#map').parent());
+
+        // move the proximity search from inside the mapbox to the top
+        $('.leaflet-control-mapbox-geocoder').appendTo('#mapbox-proximity');
+
+        // change the behaviour of the proximity search
+        var $resultsContainer = $('.leaflet-control-mapbox-geocoder-results');
+        $resultsContainer.bind("DOMSubtreeModified propertychange",function(){
+          $resultsContainer.find('a').once(function(){
+            $(this).on('click', function(){
+              $resultsContainer.hide();
+            });
+          });
+        });
+
+        $('.leaflet-control-mapbox-geocoder-form input[type=text]').attr('placeholder', Drupal.t('Search')).on('focus', function(){
+          $resultsContainer.show();
+        });
+      }
     },
 
     /**
@@ -209,6 +208,15 @@
     * */
     addMarker: function(markerData, setting) {
       if (markerData.lat && markerData.lon) {
+        var iconURL = Drupal.Mapbox.defaultIcon // default
+        if (markerData.icon) {
+          iconURL = markerData.icon;
+        }
+        Drupal.Mapbox.icons[markerData.name] = {
+          name: markerData.name,
+          iconUrl: iconURL,
+        };
+
         // setup the filter properties
         if (setting.filter.enabled) {
 
@@ -272,6 +280,7 @@
     * Add a legend container with all the used markers
     * */
     addLegend: function(setting) {
+      console.log( Drupal.Mapbox.icons);
 
       // add legend container
       $('<div id="mapbox-legend" class="mapbox-legend"><ul class="legends"></ul></div>').insertAfter('#map');
