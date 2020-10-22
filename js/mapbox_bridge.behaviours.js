@@ -19,6 +19,8 @@
 
           // access token for mapbox
           mapboxgl.accessToken = setting.mapboxBridge.publicToken;
+          console.log(setting.mapboxBridge.publicToken);
+
 
           // Load Mapbox with supplied ID
           Drupal.Mapbox.map = new mapboxgl.Map({
@@ -26,7 +28,16 @@
             style: 'mapbox://styles/mapbox/streets-v11', // style URL
           });
 
+          // disable some scroll/touch/drag features
           Drupal.Mapbox.map.scrollZoom.disable();
+          Drupal.Mapbox.map.dragRotate.disable();
+          Drupal.Mapbox.map.touchZoomRotate.disableRotation();
+          // in zoom controls
+          var nav = new mapboxgl.NavigationControl({
+            showCompass: false,
+            showZoom: true
+          });
+          Drupal.Mapbox.map.addControl(nav, "top-left");
 
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
@@ -46,31 +57,78 @@
      * */
     init: function(data, context, setting) {
       // // refresh any current data
-      // Drupal.behaviors.mapboxBridge.refresh();
-      //
+      Drupal.behaviors.mapboxBridge.refresh();
+
       // // add markers
       $.each(data, function(index, markerData){
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
       });
 
-      // use the created geojson to load all the markers
-      // Drupal.Mapbox.featureLayer = L.mapbox.featureLayer();
-      console.log(Drupal.Mapbox.geojson);
+      // Use the created geojson to load to create a new source data
+      // this is all the data of the markers generated in the loop above.
       Drupal.Mapbox.map.addSource('marker-data', {
         type: 'geojson', // specify the kind of data being added
+        cluster: setting.mapboxBridge.cluster ? true : false,// have to force a boolean as get invalid number otherwise
+        clusterMaxZoom: setting.mapboxBridge.clusterMaxZoom, // Max zoom to cluster points on
+        clusterRadius: setting.mapboxBridge.clusterRadius, // Radius of each cluster when clustering points (defaults to 50)
         data: {
           type: 'FeatureCollection',
           features: Drupal.Mapbox.geojson
         }
       });
 
+      // clustered layer styles
       Drupal.Mapbox.map.addLayer({
-        id: 'point', // the layer's ID
+        id: 'cluster', // the layer's ID
         source: 'marker-data',
-        type: 'circle', // the layer type
+        type: 'circle', // the layer type,
+        filter: ['has', 'point_count'],
         paint: {
-          'circle-radius': 10,
-          'circle-color': '#007cbf'
+          'circle-color': [
+            'step',
+            ['get', 'point_count'],
+            '#51bbd6',
+            2,
+            '#f1f075',
+            3,
+            '#f28cb1'
+          ],
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20,
+            100,
+            30,
+            750,
+            40
+          ]
+        }
+      });
+
+      // clustered layer number text
+      Drupal.Mapbox.map.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'marker-data',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 12
+        }
+      });
+
+      // unclustered style
+      Drupal.Mapbox.map.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'marker-data',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#11b4da',
+          'circle-radius': 4,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#fff'
         }
       });
 
@@ -87,18 +145,6 @@
       // // wrap everything in a layerGroup
       // Drupal.Mapbox.layerGroup = L.layerGroup();
 
-      // if (setting.mapboxBridge.cluster) {
-      //
-      //   // create clusterGroup and add it to the map
-      //   var clusterGroup = new L.MarkerClusterGroup().addTo(Drupal.Mapbox.layerGroup);
-      //
-      //   // add the featureLayer containing all the markers to the clusterGroup (so clustering happens)
-      //   Drupal.Mapbox.featureLayer.addTo(clusterGroup);
-      // } else {
-      //
-      //   // add the featureLayer containing all the markers to the map
-      //   Drupal.Mapbox.featureLayer.addTo(Drupal.Mapbox.layerGroup);
-      // }
       //
       // // add the layerGroup to the map
       // Drupal.Mapbox.layerGroup.addTo(Drupal.Mapbox.map);
@@ -207,7 +253,7 @@
             name: markerData.name,
             marker: {
               'marker-symbol': markerData.type,
-              iconUrl: 'https://api.mapbox.com/v4/marker/pin-m.png?access_token=' + L.mapbox.accessToken
+              iconUrl: 'https://api.mapbox.com/v4/marker/pin-m.png?access_token=' + mapboxgl.accessToken
             }
           };
         }

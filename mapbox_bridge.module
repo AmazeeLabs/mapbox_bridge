@@ -46,19 +46,28 @@ function mapbox_bridge_ajax_content($entity_type, $viewmode, $entity_id) {
 /**
  *
  * Custom function to draw the map
- * */
-function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE) {
+ *
+ * @param $map_id
+ * @param $type
+ * @param bool $data
+ * @param bool $legend
+ * @param int $max_zoom
+ * @param bool $popup
+ * @param string $markerAnchor
+ * @param false[] $filter
+ * @param bool $cluster
+ * @param bool $proximity
+ * @param bool $center
+ * @param bool $marker_menu
+ * @param bool $menu_viewmode
+ *
+ * @return string
+ */
+function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE) {
   if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js', 'external');
     drupal_add_css('https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css', 'external');
-
-    // cluster files
-//    if ($cluster) {
-//      drupal_add_js('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js', 'external');
-//      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css', 'external');
-//      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css', 'external');
-//    }
 
     // add chosen library
     if (module_exists('chosen')) {
@@ -88,6 +97,8 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
       'markerAnchor' => $markerAnchor,
       'filter' => $filter,
       'cluster' => $cluster,
+      'clusterMaxZoom' => 14,
+      'clusterRadius' => 50,
       'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
       'center' => $center,
       'marker_menu' => array('enabled' => $marker_menu, 'viewmode' => $menu_viewmode),

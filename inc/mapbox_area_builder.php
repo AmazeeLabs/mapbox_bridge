@@ -144,7 +144,7 @@ class MapboxAreaBuilder {
       $mapMarkers = $this->extractLegendsInfo($mapMarkers);
     }
 
-    return mapbox_bridge_render_map($this->mapboxId, $mapMarkers, $type, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor, $this->filter, $this->cluster, $this->proximity, $this->center, $this->marker_menu, $this->menu_viewmode);
+    return mapbox_bridge_render_map($this->mapboxId, $type, $mapMarkers, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor, $this->filter, $this->cluster, $this->proximity, $this->center, $this->marker_menu, $this->menu_viewmode);
   }
 
   /**
