@@ -143,12 +143,20 @@
 
 
       // set the pan & zoom of them map
-      // if (setting.mapboxBridge.center) {
-      //   Drupal.Mapbox.map.setView(setting.mapboxBridge.center.split(','), setting.mapboxBridge.maxZoom);
-      // } else {
-      //   Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
-      // }
-      //
+      if (setting.mapboxBridge.center) {
+        Drupal.Mapbox.map.flyTo({
+          center: setting.mapboxBridge.center.split(','),
+          zoom: setting.mapboxBridge.maxZoom
+        });
+      } else {
+        var bounds = new mapboxgl.LngLatBounds();
+        Drupal.Mapbox.geojson.forEach(function(marker, index){
+          bounds.extend(marker.geometry.coordinates);
+        })
+        console.log(bounds);
+        Drupal.Mapbox.map.fitBounds(bounds, { maxZoom: setting.mapboxBridge.maxZoom });
+      }
+
       // add the legend if necessary
       if (setting.mapboxBridge.legend) {
         Drupal.behaviors.mapboxBridge.addLegend(setting, data);
@@ -159,17 +167,17 @@
         // Drupal.MapboxPopup.popups(Drupal.Mapbox.sourceData, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
         Drupal.MapboxPopup.load(Drupal.Mapbox.map, 'unclustered-point', setting.mapboxBridge);
       }
-      //
-      // // create filters
-      // if (setting.mapboxBridge.filter.enabled) {
-      //   Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
-      // }
-      //
-      // // create menu
-      // if (setting.mapboxBridge.marker_menu.enabled) {
-      //   Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
-      // }
-      //
+
+      // create filters
+      if (setting.mapboxBridge.filter.enabled) {
+        Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
+      }
+
+      // create menu
+      if (setting.mapboxBridge.marker_menu.enabled) {
+        Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
+      }
+
       // check for touch devices and disable pan and zoom
       if ('ontouchstart' in document.documentElement) {
         Drupal.behaviors.mapboxBridge.panAndZoom(false);
@@ -280,7 +288,6 @@
     * Add a legend container with all the used markers
     * */
     addLegend: function(setting) {
-      console.log( Drupal.Mapbox.icons);
 
       // add legend container
       $('<div id="mapbox-legend" class="mapbox-legend"><ul class="legends"></ul></div>').insertAfter('#map');

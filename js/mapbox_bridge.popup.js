@@ -23,6 +23,10 @@
           .setHTML('')
           .addTo(map);
 
+        map.flyTo({
+          center: e.features[0].geometry.coordinates
+        });
+
         setTimeout(function (){
           Drupal.MapboxContent.load('.'+className, entityId, settings);
         },500);
