@@ -28,14 +28,14 @@
 
           Drupal.Mapbox.map.scrollZoom.disable();
 
-          // // Wait until Mapbox is loaded
-          // Drupal.Mapbox.map.on('load', function() {
-          //   if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
-          //     $.when(Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting)).done(function(){
-          //       Drupal.behaviors.mapboxBridge.alter();
-          //     });
-          //   }
-          // });
+          // Wait until Mapbox is loaded
+          Drupal.Mapbox.map.on('load', function() {
+            if (typeof setting.mapboxBridge.data != 'undefined' && setting.mapboxBridge.data) {
+              $.when(Drupal.behaviors.mapboxBridge.init($.parseJSON(setting.mapboxBridge.data), context, setting)).done(function(){
+                Drupal.behaviors.mapboxBridge.alter();
+              });
+            }
+          });
         });
       }
     },
@@ -45,104 +45,122 @@
      * Initialize base settings
      * */
     init: function(data, context, setting) {
-      // refresh any current data
-      Drupal.behaviors.mapboxBridge.refresh();
-
-      // add markers
+      // // refresh any current data
+      // Drupal.behaviors.mapboxBridge.refresh();
+      //
+      // // add markers
       $.each(data, function(index, markerData){
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
       });
 
       // use the created geojson to load all the markers
-      Drupal.Mapbox.featureLayer = L.mapbox.featureLayer(Drupal.Mapbox.geojson);
-
-      // Set a custom icon on each marker based on feature properties.
-      Drupal.Mapbox.map.on('layeradd', function(e) {
-        var marker = e.layer,
-            feature = marker.feature;
-
-        if (typeof feature != 'undefined') {
-          marker.setIcon(L.icon(feature.properties.icon));
+      // Drupal.Mapbox.featureLayer = L.mapbox.featureLayer();
+      console.log(Drupal.Mapbox.geojson);
+      Drupal.Mapbox.map.addSource('marker-data', {
+        type: 'geojson', // specify the kind of data being added
+        data: {
+          type: 'FeatureCollection',
+          features: Drupal.Mapbox.geojson
         }
       });
 
-      // wrap everything in a layerGroup
-      Drupal.Mapbox.layerGroup = L.layerGroup();
+      Drupal.Mapbox.map.addLayer({
+        id: 'point', // the layer's ID
+        source: 'marker-data',
+        type: 'circle', // the layer type
+        paint: {
+          'circle-radius': 10,
+          'circle-color': '#007cbf'
+        }
+      });
 
-      if (setting.mapboxBridge.cluster) {
+      // // Set a custom icon on each marker based on feature properties.
+      // Drupal.Mapbox.map.on('layeradd', function(e) {
+      //   var marker = e.layer,
+      //       feature = marker.feature;
+      //
+      //   if (typeof feature != 'undefined') {
+      //     marker.setIcon(L.icon(feature.properties.icon));
+      //   }
+      // });
+      //
+      // // wrap everything in a layerGroup
+      // Drupal.Mapbox.layerGroup = L.layerGroup();
 
-        // create clusterGroup and add it to the map
-        var clusterGroup = new L.MarkerClusterGroup().addTo(Drupal.Mapbox.layerGroup);
-
-        // add the featureLayer containing all the markers to the clusterGroup (so clustering happens)
-        Drupal.Mapbox.featureLayer.addTo(clusterGroup);
-      } else {
-
-        // add the featureLayer containing all the markers to the map
-        Drupal.Mapbox.featureLayer.addTo(Drupal.Mapbox.layerGroup);
-      }
-
-      // add the layerGroup to the map
-      Drupal.Mapbox.layerGroup.addTo(Drupal.Mapbox.map);
-
-      // set the pan & zoom of them map
-      if (setting.mapboxBridge.center) {
-        Drupal.Mapbox.map.setView(setting.mapboxBridge.center.split(','), setting.mapboxBridge.maxZoom);
-      } else {
-        Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
-      }
-
-      // add the legend if necessary
-      if (setting.mapboxBridge.legend) {
-        Drupal.behaviors.mapboxBridge.addLegend(setting, data);
-      }
-
-      // create the popups
-      if (setting.mapboxBridge.popup.enabled) {
-        Drupal.MapboxPopup.popups(Drupal.Mapbox.featureLayer, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
-      }
-
-      // create filters
-      if (setting.mapboxBridge.filter.enabled) {
-        Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
-      }
-
-      // create menu
-      if (setting.mapboxBridge.marker_menu.enabled) {
-        Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
-      }
-
-      // check for touch devices and disable pan and zoom
-      if ('ontouchstart' in document.documentElement) {
-        Drupal.behaviors.mapboxBridge.panAndZoom(false);
-      }
-
-      // enable proximity search
-      if (setting.mapboxBridge.proximity.enabled) {
-        Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
-          autocomplete: true
-        }));
-
-        // place the proximity wrapper at the top
-        $('<div id="mapbox-proximity" class="mapbox-proximity"><h3>' + setting.mapboxBridge.proximity.label + '</h3></div>').prependTo($('#map').parent());
-
-        // move the proximity search from inside the mapbox to the top
-        $('.leaflet-control-mapbox-geocoder').appendTo('#mapbox-proximity');
-
-        // change the behaviour of the proximity search
-        var $resultsContainer = $('.leaflet-control-mapbox-geocoder-results');
-        $resultsContainer.bind("DOMSubtreeModified propertychange",function(){
-          $resultsContainer.find('a').once(function(){
-            $(this).on('click', function(){
-              $resultsContainer.hide();
-            });
-          });
-        });
-
-        $('.leaflet-control-mapbox-geocoder-form input[type=text]').attr('placeholder', Drupal.t('Search')).on('focus', function(){
-          $resultsContainer.show();
-        });
-      }
+      // if (setting.mapboxBridge.cluster) {
+      //
+      //   // create clusterGroup and add it to the map
+      //   var clusterGroup = new L.MarkerClusterGroup().addTo(Drupal.Mapbox.layerGroup);
+      //
+      //   // add the featureLayer containing all the markers to the clusterGroup (so clustering happens)
+      //   Drupal.Mapbox.featureLayer.addTo(clusterGroup);
+      // } else {
+      //
+      //   // add the featureLayer containing all the markers to the map
+      //   Drupal.Mapbox.featureLayer.addTo(Drupal.Mapbox.layerGroup);
+      // }
+      //
+      // // add the layerGroup to the map
+      // Drupal.Mapbox.layerGroup.addTo(Drupal.Mapbox.map);
+      //
+      // // set the pan & zoom of them map
+      // if (setting.mapboxBridge.center) {
+      //   Drupal.Mapbox.map.setView(setting.mapboxBridge.center.split(','), setting.mapboxBridge.maxZoom);
+      // } else {
+      //   Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
+      // }
+      //
+      // // add the legend if necessary
+      // if (setting.mapboxBridge.legend) {
+      //   Drupal.behaviors.mapboxBridge.addLegend(setting, data);
+      // }
+      //
+      // // create the popups
+      // if (setting.mapboxBridge.popup.enabled) {
+      //   Drupal.MapboxPopup.popups(Drupal.Mapbox.featureLayer, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
+      // }
+      //
+      // // create filters
+      // if (setting.mapboxBridge.filter.enabled) {
+      //   Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
+      // }
+      //
+      // // create menu
+      // if (setting.mapboxBridge.marker_menu.enabled) {
+      //   Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
+      // }
+      //
+      // // check for touch devices and disable pan and zoom
+      // if ('ontouchstart' in document.documentElement) {
+      //   Drupal.behaviors.mapboxBridge.panAndZoom(false);
+      // }
+      //
+      // // enable proximity search
+      // if (setting.mapboxBridge.proximity.enabled) {
+      //   Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
+      //     autocomplete: true
+      //   }));
+      //
+      //   // place the proximity wrapper at the top
+      //   $('<div id="mapbox-proximity" class="mapbox-proximity"><h3>' + setting.mapboxBridge.proximity.label + '</h3></div>').prependTo($('#map').parent());
+      //
+      //   // move the proximity search from inside the mapbox to the top
+      //   $('.leaflet-control-mapbox-geocoder').appendTo('#mapbox-proximity');
+      //
+      //   // change the behaviour of the proximity search
+      //   var $resultsContainer = $('.leaflet-control-mapbox-geocoder-results');
+      //   $resultsContainer.bind("DOMSubtreeModified propertychange",function(){
+      //     $resultsContainer.find('a').once(function(){
+      //       $(this).on('click', function(){
+      //         $resultsContainer.hide();
+      //       });
+      //     });
+      //   });
+      //
+      //   $('.leaflet-control-mapbox-geocoder-form input[type=text]').attr('placeholder', Drupal.t('Search')).on('focus', function(){
+      //     $resultsContainer.show();
+      //   });
+      // }
     },
 
     /**
