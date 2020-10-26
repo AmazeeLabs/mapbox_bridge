@@ -267,6 +267,11 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#size' => 3,
       '#description' => t('The max zoom size for clusters before they stop grouping.'),
       '#default_value' => $this->options['mapbox_marker']['cluster_max_zoom'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('cluster_disabled'),
+        )
+      )
     );
 
     $form['mapbox_marker']['cluster_radius'] = array(
@@ -275,6 +280,11 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#size' => 3,
       '#description' => t('The max radius size for clusters where markers will be grouped.'),
       '#default_value' => $this->options['mapbox_marker']['cluster_radius'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('cluster_disabled'),
+        )
+      )
     );
 
     $form['mapbox_marker']['cluster_styles'] = array(
@@ -282,6 +292,11 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Cluster styles'),
       '#description' => t('Use step expressions to configure colour styles, separate each value with a comma. Example: !link', array('!link' => l(t('here'), 'https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#step', array('attributes' => array('target' => '_blank'))))),
       '#default_value' => $this->options['mapbox_marker']['cluster_styles'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('cluster_disabled'),
+        )
+      )
     );
 
     $form['mapbox_marker']['cluster_text_color'] = array(
@@ -289,6 +304,11 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Cluster text color'),
       '#description' => t('The color of the text for the clusters.'),
       '#default_value' => $this->options['mapbox_marker']['cluster_styles'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('cluster_disabled'),
+        )
+      )
     );
 
     $form['mapbox_marker']['proximity'] = array(
@@ -461,6 +481,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
       'marker_type_none' => array(':input[name="options[mapbox_marker][type]"]' => array('value' => 'none')),
       'marker_type_taxonomy' => array(':input[name="options[mapbox_marker][type]"]' => array('value' => 'taxonomy')),
       'popup_disabled' => array(':input[name="options[mapbox_popup][popup]"]' => array('checked' => FALSE)),
+      'cluster_disabled' => array(':input[name="options[mapbox_marker][cluster]"]' => array('checked' => FALSE))
     );
     return $states[$name];
   }

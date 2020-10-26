@@ -79,70 +79,72 @@
       });
       Drupal.Mapbox.sourceData = Drupal.Mapbox.map.getSource('marker-data');
 
+      if(setting.mapboxBridge.cluster) {
 
-      var cluster = {
-        id: 'cluster', // the layer's ID
-        source: 'marker-data',
-        type: 'circle', // the layer type,
-        filter: ['has', 'point_count'],
-        paint: {
-          'circle-color': [
-            'step',
-            ['get', 'point_count']
-          ],
-          'circle-radius': [
-            'step',
-            ['get', 'point_count'],
-          ]
-        }
-      };
+        var cluster = {
+          id: 'cluster', // the layer's ID
+          source: 'marker-data',
+          type: 'circle', // the layer type,
+          filter: ['has', 'point_count'],
+          paint: {
+            'circle-color': [
+              'step',
+              ['get', 'point_count']
+            ],
+            'circle-radius': [
+              'step',
+              ['get', 'point_count'],
+            ]
+          }
+        };
 
-      var currentClusterSize = 20;
-      var clusterIncrement = 1;
-      $.each(setting.mapboxBridge.clusterStyles, function(index, style){
-        var isNumber = false;
-        var value = style;
+        var currentClusterSize = 20;
+        var clusterIncrement = 1;
+        $.each(setting.mapboxBridge.clusterStyles, function (index, style) {
+          var isNumber = false;
+          var value = style;
 
-        // check for a number
-        if(!isNaN(value)){
-          value = parseInt(value);
-          isNumber = true;
-        }
+          // check for a number
+          if (!isNaN(value)) {
+            value = parseInt(value);
+            isNumber = true;
+          }
 
-        // fill in the values for the colours
-        cluster.paint['circle-color'].push(value);
+          // fill in the values for the colours
+          cluster.paint['circle-color'].push(value);
 
-        // generate the radius values
-        if(isNumber){
+          // generate the radius values
+          if (isNumber) {
+            cluster.paint['circle-radius'].push(currentClusterSize);
+            cluster.paint['circle-radius'].push(value);
+            currentClusterSize += clusterIncrement;
+          }
+        });
+
+        // add the final radius value
+        if (cluster.paint['circle-radius'].length > 2 && cluster.paint['circle-radius'].length < (setting.mapboxBridge.clusterStyles.length + 2)) {
           cluster.paint['circle-radius'].push(currentClusterSize);
-          cluster.paint['circle-radius'].push(value);
-          currentClusterSize += clusterIncrement;
         }
-      });
 
-      // add the final radius value
-      if(cluster.paint['circle-radius'].length > 2 && cluster.paint['circle-radius'].length < (setting.mapboxBridge.clusterStyles.length + 2)){
-        cluster.paint['circle-radius'].push(currentClusterSize);
+        // clustered layer styles
+        Drupal.Mapbox.map.addLayer(cluster);
+
+        // clustered layer number text
+        Drupal.Mapbox.map.addLayer({
+          id: 'cluster-count',
+          type: 'symbol',
+          source: 'marker-data',
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 12,
+          },
+          paint: {
+            "text-color": setting.mapboxBridge.cluster_text,
+          }
+        });
       }
-
-      // clustered layer styles
-      Drupal.Mapbox.map.addLayer(cluster);
-
-      // clustered layer number text
-      Drupal.Mapbox.map.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'marker-data',
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-field': '{point_count_abbreviated}',
-          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 12,
-        },
-        paint: {
-          "text-color": setting.mapboxBridge.cluster_text,
-        }
-      });
 
       // unclustered style with custom icons images
       var imageURL = Drupal.Mapbox.defaultIcon // default
@@ -178,7 +180,7 @@
         Drupal.Mapbox.geojson.forEach(function(marker, index){
           bounds.extend(marker.geometry.coordinates);
         })
-        Drupal.Mapbox.map.fitBounds(bounds, { maxZoom: setting.mapboxBridge.maxZoom });
+        Drupal.Mapbox.map.fitBounds(bounds, { maxZoom: setting.mapboxBridge.maxZoom, padding: 70 });
       }
 
       // add the legend if necessary

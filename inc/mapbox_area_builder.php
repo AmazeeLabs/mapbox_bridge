@@ -115,7 +115,7 @@ class MapboxAreaBuilder {
     $this->center = $center;
     $this->marker_menu = $marker_menu;
     $this->menu_viewmode = $menu_viewmode;
-    $this->icon_multiplier = $icon_multiplier;
+    $this->icon_multiplier = (float)$icon_multiplier;
   }
 
   /**
