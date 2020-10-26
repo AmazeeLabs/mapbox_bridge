@@ -55,15 +55,21 @@ function mapbox_bridge_ajax_content($entity_type, $viewmode, $entity_id) {
  * @param bool $popup
  * @param string $markerAnchor
  * @param false[] $filter
+ * @param string $map_styles
  * @param bool $cluster
+ * @param int $cluster_max_zoom
+ * @param int $cluster_radius
+ * @param string[] $cluster_styles
+ * @param string $cluster_text
  * @param bool $proximity
  * @param bool $center
  * @param bool $marker_menu
  * @param bool $menu_viewmode
+ * @param float $icon_multiplier
  *
  * @return string
  */
-function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE) {
+function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $map_styles = 'mapbox://styles/mapbox/light-v10', $cluster = false, $cluster_max_zoom = 14, $cluster_radius = 50, $cluster_styles = array('#51bbd6','2','#f1f075','3','#f28cb1'), $cluster_text = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE, $icon_multiplier = 0.5) {
   if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js', 'external');
@@ -96,11 +102,13 @@ function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false
       'popup' => $popup,
       'markerAnchor' => $markerAnchor,
       'filter' => $filter,
+      'style' => $map_styles,
       'cluster' => $cluster,
-      'clusterMaxZoom' => 14,
-      'clusterRadius' => 50,
-      'iconMultiplier' => 0.5,
-      'style' => 'mapbox://styles/mapbox/light-v10',
+      'clusterMaxZoom' => $cluster_max_zoom,
+      'clusterRadius' => $cluster_radius,
+      'clusterStyles' => $cluster_styles,
+      'cluster_text' => $cluster_text,
+      'iconMultiplier' => $icon_multiplier,
       'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
       'center' => $center,
       'marker_menu' => array('enabled' => $marker_menu, 'viewmode' => $menu_viewmode),

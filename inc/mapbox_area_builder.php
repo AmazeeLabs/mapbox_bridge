@@ -65,21 +65,37 @@ class MapboxAreaBuilder {
    *  Map Id
    * @param string $geofield
    *  Geofield name
+   * @param string $style
    * @param string $markerTypeField
    *  Taxonomy reference field used to get marker type
+   * @param bool $legend
    * @param string $symbolName
    *  Field name used to store symbol name when standar one is used
    * @param string $symbolIcon
    *  Field name used to upload custom icons
+   * @param int $max_zoom
+   * @param bool $popup
    * @param array $defaultIcon
    *  Default icon specifications (value keys: name, src, width, height)
-   * @param array $markerAnchor
+   * @param string $markerAnchor
    *  Marker's anchor position
+   * @param false[] $filter
+   * @param bool $cluster
+   * @param int $clusterMaxZoom
+   * @param int $clusterRadius
+   * @param string[] $clusterStyles
+   * @param string $clusterText
+   * @param bool $proximity
+   * @param bool $center
+   * @param bool $marker_menu
+   * @param null $menu_viewmode
+   * @param float $icon_multiplier
    */
-  public function __construct($object, $mapboxId, $geofield, $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = NULL) {
+  public function __construct($object, $mapboxId, $geofield, $style = 'mapbox://styles/mapbox/light-v10', $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $clusterMaxZoom = 14, $clusterRadius = 50, $clusterStyles = array('#51bbd6','2','#f1f075','3','#f28cb1'), $clusterText = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = NULL, $icon_multiplier = 0.5) {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
+    $this->style =$style;
     $this->markerTypeField = $markerTypeField;
     $this->legend = $legend;
     $this->fieldSymbolIcon = $symbolIcon;
@@ -91,10 +107,15 @@ class MapboxAreaBuilder {
     $this->markerAnchor = $markerAnchor;
     $this->filter = $filter;
     $this->cluster = $cluster;
+    $this->clusterMaxZoom = $clusterMaxZoom;
+    $this->clusterRadius = $clusterRadius;
+    $this->clusterStyles = $clusterStyles;
+    $this->clusterText = $clusterText;
     $this->proximity = $proximity;
     $this->center = $center;
     $this->marker_menu = $marker_menu;
     $this->menu_viewmode = $menu_viewmode;
+    $this->icon_multiplier = $icon_multiplier;
   }
 
   /**
@@ -144,7 +165,7 @@ class MapboxAreaBuilder {
       $mapMarkers = $this->extractLegendsInfo($mapMarkers);
     }
 
-    return mapbox_bridge_render_map($this->mapboxId, $type, $mapMarkers, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor, $this->filter, $this->cluster, $this->proximity, $this->center, $this->marker_menu, $this->menu_viewmode);
+    return mapbox_bridge_render_map($this->mapboxId, $type, $mapMarkers, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor, $this->filter, $this->style, $this->cluster, $this->clusterMaxZoom, $this->clusterRadius, $this->clusterStyles, $this->clusterText, $this->proximity, $this->center, $this->marker_menu, $this->menu_viewmode, $this->icon_multiplier);
   }
 
   /**

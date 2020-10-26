@@ -21,6 +21,10 @@ class views_plugin_style_mapbox extends views_plugin_style {
       'default' => NULL,
       'translatable' => FALSE
     );
+    $options['mapbox_style'] = array(
+      'default' => 'mapbox://styles/mapbox/light-v10',
+      'translatable' => FALSE
+    );
     $options['max_zoom_level'] = array(
       'default' => 12,
       'translatable' => FALSE
@@ -47,6 +51,22 @@ class views_plugin_style_mapbox extends views_plugin_style {
     );
     $options['marker_cluster'] = array(
       'default' => FALSE,
+      'translatable' => FALSE
+    );
+    $options['marker_cluster_max_zoom'] = array(
+      'default' => 14,
+      'translatable' => FALSE
+    );
+    $options['marker_cluster_radius'] = array(
+      'default' => 50,
+      'translatable' => FALSE
+    );
+    $options['marker_cluster_styles'] = array(
+      'default' => '#51bbd6,2,#f1f075,3,#f28cb1',
+      'translatable' => FALSE
+    );
+    $options['marker_cluster_text_color'] = array(
+      'default' => '#FFFFFF',
       'translatable' => FALSE
     );
     $options['marker_proximity_search'] = array(
@@ -77,6 +97,10 @@ class views_plugin_style_mapbox extends views_plugin_style {
       'default' => 0,
       'translatable' => FALSE
     );
+    $options['marker_icon_multiplier'] = array(
+      'default' => 0.5,
+      'translatable' => FALSE
+    );
     return $options;
   }
 
@@ -102,6 +126,14 @@ class views_plugin_style_mapbox extends views_plugin_style {
       '#title' => t('Mapbox ID'),
       '#description' => t('ID of your Mapbox project: !mapbox', $t_args),
       '#default_value' => $this->options['mapbox_id'],
+      '#required' => TRUE,
+    );
+
+    $form['mapbox_style'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Mapbox style'),
+      '#description' => t('The style/loop of the mapbox map, example: !link', array('!link' => l('here', 'https://docs.mapbox.com/mapbox-gl-js/example/setstyle/', array('attributes' => array('target' => '_blank'))))),
+      '#default_value' => $this->options['mapbox_style'],
       '#required' => TRUE,
     );
 
@@ -180,9 +212,60 @@ class views_plugin_style_mapbox extends views_plugin_style {
     $form['marker_cluster'] = array(
       '#type' => 'checkbox',
       '#title' => t('Cluster'),
-      '#description' => t('Enable clustering, example: !link', array('!link' => l(t('here'), 'https://www.mapbox.com/mapbox.js/example/v1.0.0/leaflet-markercluster/', array('attributes' => array('target' => '_blank'))))),
+      '#description' => t('Enable clustering, example: !link', array('!link' => l(t('here'), 'https://docs.mapbox.com/mapbox-gl-js/example/cluster/', array('attributes' => array('target' => '_blank'))))),
       '#default_value' => $this->options['marker_cluster'],
     );
+
+    $form['marker_cluster_max_zoom'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cluster max zoom'),
+      '#size' => 3,
+      '#description' => t('The max zoom size for clusters before they stop grouping.'),
+      '#default_value' => $this->options['marker_cluster_max_zoom'],
+      '#states' => array(
+        'invisible' => array(
+          'input[name="style_options[marker_cluster]"]' => array('checked' => FALSE),
+        ),
+      ),
+    );
+
+    $form['marker_cluster_radius'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cluster radius'),
+      '#size' => 3,
+      '#description' => t('The max radius size for clusters where markers will be grouped.'),
+      '#default_value' => $this->options['marker_cluster_radius'],
+      '#states' => array(
+        'invisible' => array(
+          'input[name="style_options[marker_cluster]"]' => array('checked' => FALSE),
+        ),
+      ),
+    );
+
+    $form['marker_cluster_styles'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cluster styles'),
+      '#description' => t('Use step expressions to configure colour styles, separate each value with a comma. Example: !link', array('!link' => l(t('here'), 'https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#step', array('attributes' => array('target' => '_blank'))))),
+      '#default_value' => $this->options['marker_cluster_styles'],
+      '#states' => array(
+        'invisible' => array(
+          'input[name="style_options[marker_cluster]"]' => array('checked' => FALSE),
+        ),
+      ),
+    );
+
+    $form['marker_cluster_text_color'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cluster text color'),
+      '#description' => t('The color of the text for the clusters.'),
+      '#default_value' => $this->options['marker_cluster_text_color'],
+      '#states' => array(
+        'invisible' => array(
+          'input[name="style_options[marker_cluster]"]' => array('checked' => FALSE),
+        ),
+      ),
+    );
+
 
     // The proximity search.
     $form['marker_proximity_search'] = array(
@@ -247,6 +330,17 @@ class views_plugin_style_mapbox extends views_plugin_style {
       '#default_value' => $this->options['marker_icon_height'],
       '#required' => TRUE,
     );
+
+    $form['marker_icon_multiplier'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Icon multiplier'),
+      '#size' => 3,
+      '#description' => t('Icon multiplier how big or small to show the icon, example: 0.5 will be half the size.'),
+      '#default_value' => $this->options['marker_icon_multiplier'],
+      '#required' => TRUE,
+    );
+
+
   }
 
   /**
@@ -329,7 +423,8 @@ class views_plugin_style_mapbox extends views_plugin_style {
       $marker_points,
       $this->options['mapbox_id'],
       '', // We do not have any geofield here.
-      NULL, // The marker type. We will use alwyas an image.
+      $this->options['mapbox_style'],
+      NULL, // The marker type. We will use always an image.
       $this->options['marker_legend'],
       '', // The symbol name.
       '', // The symbol icon
@@ -350,8 +445,13 @@ class views_plugin_style_mapbox extends views_plugin_style {
         'filter_fields' => $filter_fields,
       ),
       $this->options['marker_cluster'],
+      intval($this->options['marker_cluster_max_zoom']),
+      intval($this->options['marker_cluster_radius']),
+      explode(",", $this->options['marker_cluster_styles']),
+      $this->options['marker_cluster_text_color'],
       $this->options['marker_proximity_search'],
-      $this->options['center']
+      $this->options['center'],
+      $this->options['marker_icon_multiplier']
     );
 
     return $mapBuilder->getMap();

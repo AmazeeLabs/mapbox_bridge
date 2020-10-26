@@ -14,6 +14,7 @@
    */
   Drupal.behaviors.mapboxBridge = {
     attach: function(context, setting) {
+      console.log(setting.mapboxBridge);
       if (typeof mapboxgl != 'undefined' && $('#map', context).length) {
         $('#map', context).once('mapbox-bridge', function(){
 
@@ -78,8 +79,8 @@
       });
       Drupal.Mapbox.sourceData = Drupal.Mapbox.map.getSource('marker-data');
 
-      // clustered layer styles
-      Drupal.Mapbox.map.addLayer({
+
+      var cluster = {
         id: 'cluster', // the layer's ID
         source: 'marker-data',
         type: 'circle', // the layer type,
@@ -87,24 +88,45 @@
         paint: {
           'circle-color': [
             'step',
-            ['get', 'point_count'],
-            '#51bbd6',
-            2,
-            '#f1f075',
-            3,
-            '#f28cb1'
+            ['get', 'point_count']
           ],
           'circle-radius': [
             'step',
             ['get', 'point_count'],
-            20,
-            100,
-            30,
-            750,
-            40
           ]
         }
+      };
+
+      var currentClusterSize = 20;
+      var clusterIncrement = 1;
+      $.each(setting.mapboxBridge.clusterStyles, function(index, style){
+        var isNumber = false;
+        var value = style;
+
+        // check for a number
+        if(!isNaN(value)){
+          value = parseInt(value);
+          isNumber = true;
+        }
+
+        // fill in the values for the colours
+        cluster.paint['circle-color'].push(value);
+
+        // generate the radius values
+        if(isNumber){
+          cluster.paint['circle-radius'].push(currentClusterSize);
+          cluster.paint['circle-radius'].push(value);
+          currentClusterSize += clusterIncrement;
+        }
       });
+
+      // add the final radius value
+      if(cluster.paint['circle-radius'].length > 2 && cluster.paint['circle-radius'].length < (setting.mapboxBridge.clusterStyles.length + 2)){
+        cluster.paint['circle-radius'].push(currentClusterSize);
+      }
+
+      // clustered layer styles
+      Drupal.Mapbox.map.addLayer(cluster);
 
       // clustered layer number text
       Drupal.Mapbox.map.addLayer({
@@ -115,7 +137,10 @@
         layout: {
           'text-field': '{point_count_abbreviated}',
           'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 12
+          'text-size': 12,
+        },
+        paint: {
+          "text-color": setting.mapboxBridge.cluster_text,
         }
       });
 
