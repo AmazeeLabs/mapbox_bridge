@@ -12,7 +12,7 @@
       return new Promise(function(resolve, reject) {
         $('<div id="' + contentId + '" />').load(path, {limit:25}, function (responseText, textStatus, req) {
           if (textStatus === "error") {
-            reject(textStatus);
+            reject({status: textStatus, req: req, element: $(target)});
           }
 
           resolve({html: responseText, element: $(target)});

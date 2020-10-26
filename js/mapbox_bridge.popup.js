@@ -36,7 +36,9 @@
             popup.setHTML(data.html);
             data.element.removeClass('loading');
           }).catch(function (error){
-            console.error(error.message);
+            popup.setHTML(error.status);
+            error.element.removeClass('loading');
+            console.error(error);
           });
         },500);
       });
