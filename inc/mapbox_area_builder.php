@@ -95,7 +95,7 @@ class MapboxAreaBuilder {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
-    $this->style =$style;
+    $this->style = $style;
     $this->markerTypeField = $markerTypeField;
     $this->legend = $legend;
     $this->fieldSymbolIcon = $symbolIcon;

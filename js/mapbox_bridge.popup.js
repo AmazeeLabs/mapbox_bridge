@@ -20,9 +20,19 @@
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
         }
 
+        var height = 0;
+        var topOffset = 70 / 2;
+        var data = $.parseJSON(settings.data);
+        if(typeof data[0] !== 'undefined' && data[0].iconHeight){
+          height = data[0].iconHeight;
+        }
+        if(height > 0) {
+          topOffset = (height * settings.iconMultiplier) / 2;
+        }
         var popup = new mapboxgl.Popup({
           className: 'custom-popup-content loading ' + className,
           anchor: 'bottom-left',
+          offset: [0, -topOffset],
         }).setLngLat(coordinates)
           .setHTML('<p>Loading...</p>')
           .addTo(map);
@@ -32,7 +42,7 @@
         });
 
         setTimeout(function (){
-          Drupal.MapboxContent.load('.'+className, entityId, settings).then(function (data){
+          Drupal.MapboxContent.load('.'+className, entityId, settings).then(function (data){;
             popup.setHTML(data.html);
             data.element.removeClass('loading');
           }).catch(function (error){
