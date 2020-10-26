@@ -91,7 +91,7 @@ class MapboxAreaBuilder {
    * @param null $menu_viewmode
    * @param float $icon_multiplier
    */
-  public function __construct($object, $mapboxId, $geofield, $style = 'mapbox://styles/mapbox/light-v10', $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $clusterMaxZoom = 14, $clusterRadius = 50, $clusterStyles = array('#51bbd6','2','#f1f075','3','#f28cb1'), $clusterText = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = NULL, $icon_multiplier = 0.5) {
+  public function __construct($object, $mapboxId, $geofield, $style = 'mapbox://styles/mapbox/light-v10', $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $clusterMaxZoom = 14, $clusterRadius = 50, $clusterStyles = '#51bbd6, 2, #f1f075, 3, #f28cb1', $clusterText = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = NULL, $icon_multiplier = 0.5) {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
@@ -107,9 +107,9 @@ class MapboxAreaBuilder {
     $this->markerAnchor = $markerAnchor;
     $this->filter = $filter;
     $this->cluster = $cluster;
-    $this->clusterMaxZoom = $clusterMaxZoom;
-    $this->clusterRadius = $clusterRadius;
-    $this->clusterStyles = $clusterStyles;
+    $this->clusterMaxZoom = intval($clusterMaxZoom);
+    $this->clusterRadius = intval($clusterRadius);
+    $this->clusterStyles = explode(',', $clusterStyles);
     $this->clusterText = $clusterText;
     $this->proximity = $proximity;
     $this->center = $center;
