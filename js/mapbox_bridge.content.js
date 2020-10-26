@@ -42,6 +42,8 @@
       var entity_type = settings.popup.popup_entity_type;
       if(typeof entity_type !== "undefined"){
         path += '/' + entity_type;
+      }else{
+        path += '/node';
       }
 
       var viewmode = settings.popup.popup_viewmode;
