@@ -4,25 +4,24 @@
    * Mapbox Content Ajax Loader
    */
   Drupal.MapboxContent = {
-    load: function(target, entity_id, settings, onComplete) {
+    load: function(target, entity_id, settings) {
+      var contentId = "popup-loaded-content";
       var path = this.createPath(settings, entity_id);
       // load the node with the supplied viewmode
 
-      $(target).load(path, function(content){
-        var $this = $(this);
+      return new Promise(function(resolve, reject) {
+        $('<div id="' + contentId + '" />').load(path, {limit:25}, function (responseText, textStatus, req) {
+          if (textStatus === "error") {
+            reject(textStatus);
+          }
 
-        // remove loading indicator
-        $this.removeClass('loading');
+          resolve({html: responseText, element: $(target)});
 
-        // execute complete function when available
-        if (onComplete) {
-          onComplete($this);
-        }
-
-        // general complete function, can be overwritten
-        Drupal.MapboxContent.onComplete($this);
+          // general complete function, can be overwritten
+          Drupal.MapboxContent.onComplete($(target));
+        });
       });
-    },
+      },
 
     onComplete: function (e) {
       // copy this to your own .js file to overwrite it

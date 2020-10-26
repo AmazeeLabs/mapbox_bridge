@@ -8,7 +8,6 @@
   Drupal.MapboxPopup = {
     load: function (map, layerName, settings){
       map.on('click', layerName, function (e) {
-        console.log(e.features[0].properties);
         var coordinates = e.features[0].geometry.coordinates.slice();
         var entityId = e.features[0].properties.popup_entity_id;
         if(e.features[0].properties.type === "custom"){
@@ -21,11 +20,11 @@
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
         }
 
-        new mapboxgl.Popup({
+        var popup = new mapboxgl.Popup({
           className: 'custom-popup-content loading ' + className,
           anchor: 'bottom-left',
         }).setLngLat(coordinates)
-          .setHTML('')
+          .setHTML('<p>Loading...</p>')
           .addTo(map);
 
         map.flyTo({
@@ -33,7 +32,12 @@
         });
 
         setTimeout(function (){
-          Drupal.MapboxContent.load('.'+className, entityId, settings);
+          Drupal.MapboxContent.load('.'+className, entityId, settings).then(function (data){
+            popup.setHTML(data.html);
+            data.element.removeClass('loading');
+          }).catch(function (error){
+            console.error(error.message);
+          });
         },500);
       });
     }

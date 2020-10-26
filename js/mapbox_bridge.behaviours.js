@@ -14,7 +14,6 @@
    */
   Drupal.behaviors.mapboxBridge = {
     attach: function(context, setting) {
-      console.log(setting.mapboxBridge);
       if (typeof mapboxgl != 'undefined' && $('#map', context).length) {
         $('#map', context).once('mapbox-bridge', function(){
 
@@ -300,7 +299,6 @@
           });
         }
 
-        console.log(markerData);
         // create geojson object with the provided attributes
         Drupal.Mapbox.geojson.push({
           'type': 'Feature',
