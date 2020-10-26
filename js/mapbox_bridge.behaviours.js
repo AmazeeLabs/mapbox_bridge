@@ -26,6 +26,7 @@
           Drupal.Mapbox.map = new mapboxgl.Map({
             container: 'map', // container id
             style: setting.mapboxBridge.style,
+            maxZoom: setting.mapboxBridge.maxZoom,
           });
 
           // disable some scroll/touch/drag features
@@ -202,6 +203,7 @@
       }
 
       // create menu
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.marker_menu.enabled) {
         Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
       }
@@ -212,8 +214,8 @@
       }
 
       // enable proximity search
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.proximity.enabled) {
-        // TODO: This will not work in the current version
         // See: https://docs.mapbox.com/mapbox-gl-js/example/mapbox-gl-geocoder/
         Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
           autocomplete: true
@@ -298,6 +300,7 @@
           });
         }
 
+        console.log(markerData);
         // create geojson object with the provided attributes
         Drupal.Mapbox.geojson.push({
           'type': 'Feature',
@@ -307,6 +310,8 @@
           },
           'properties': {
             'popup_entity_id': markerData.popup_entity_id,
+            'nid': markerData.nid,
+            'type': markerData.type,
             'filter': setting.filter.enabled ? filter : false
           }
         });

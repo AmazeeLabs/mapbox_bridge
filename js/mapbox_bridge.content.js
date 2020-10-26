@@ -37,7 +37,19 @@
         path += '/' + settings.path_settings.language;
       }
 
-      path += '/mapbox_bridge_ajax_content/' + settings.popup.popup_entity_type + '/' + settings.popup.popup_viewmode + '/' + entity_id;
+      path += '/mapbox_bridge_ajax_content';
+
+      var entity_type = settings.popup.popup_entity_type;
+      if(typeof entity_type !== "undefined"){
+        path += '/' + entity_type;
+      }
+
+      var viewmode = settings.popup.popup_viewmode;
+      if(typeof viewmode !== "undefined"){
+        path += '/' + viewmode;
+      }
+
+      path += '/' + entity_id;
 
       return path;
     }
