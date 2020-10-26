@@ -190,7 +190,6 @@
       }
 
       // create the popups
-      // TODO: This will not work in the current version
       if (setting.mapboxBridge.popup.enabled) {
         Drupal.MapboxPopup.load(Drupal.Mapbox.map, 'unclustered-point', setting.mapboxBridge);
       }
