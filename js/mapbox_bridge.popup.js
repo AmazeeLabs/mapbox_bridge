@@ -34,7 +34,7 @@
           anchor: 'bottom-left',
           offset: [0, -topOffset],
         }).setLngLat(coordinates)
-          .setHTML('<p>Loading...</p>')
+          .setHTML('')
           .addTo(map);
 
         map.flyTo({
