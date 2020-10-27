@@ -21,12 +21,16 @@
           mapboxgl.accessToken = setting.mapboxBridge.publicToken;
           Drupal.Mapbox.defaultIcon = "https://api.mapbox.com/v4/marker/pin-m.png?access_token=" + mapboxgl.accessToken;
 
-          // Load Mapbox with supplied ID
-          Drupal.Mapbox.map = new mapboxgl.Map({
+          var mapboxObj = {
             container: 'map', // container id
             style: setting.mapboxBridge.style,
             maxZoom: setting.mapboxBridge.maxZoom,
-          });
+          }
+          if(setting.mapboxBridge.center){
+            mapboxObj['center'] = setting.mapboxBridge.center.split(',');
+          }
+          // Load Mapbox with supplied ID
+          Drupal.Mapbox.map = new mapboxgl.Map(mapboxObj);
 
           // disable some scroll/touch/drag features
           Drupal.Mapbox.map.scrollZoom.disable();
@@ -158,10 +162,10 @@
           id: 'unclustered-point',
           type: 'symbol',
           source: 'marker-data',
-          filter: ['!', ['has', 'point_count']],
+          // filter: ['!', ['has', 'point_count']],
           'layout': {
             "icon-image": "marker-image", // the name of image file we used above
-            "icon-allow-overlap": false,
+            "icon-allow-overlap": true,
             "icon-size": setting.mapboxBridge.iconMultiplier //this is a multiplier applied to the standard size. So if you want it half the size put ".5"
           }
         });
