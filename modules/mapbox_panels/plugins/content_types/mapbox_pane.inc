@@ -20,10 +20,44 @@ $plugin = array(
   'required context' => new ctools_context_required(t('Node'), 'node'),
 );
 
+function _mapbox_pane_default_conf($conf){
+  $default_keys =[
+    'mapbox_id' => NULL,
+    'geo' => NULL,
+    'mapbox_style' => 'mapbox://styles/mapbox/light-v10',
+    'mapbox_max_zoom' => 12,
+    'custom_icon_src' => '',
+    'name' => '',
+    'icon' => '',
+    'popup_viewmode' => '',
+    'cluster_max_zoom' => 12,
+    'cluster_radius' => 14,
+    'cluster_styles' => '#51bbd6,2,#f1f075,3,#f28cb1',
+    'cluster_text_color' => '#FFFFFF',
+    'marker_anchor' => 'center_center',
+    'proximity' => FALSE,
+    'cluster' => FALSE,
+    'popup' => FALSE,
+    'legend' => FALSE,
+    'custom_icon_width' => 0,
+    'custom_icon_height' => 0,
+    'icon_multiplier' => 0.5
+  ];
+
+  foreach ($default_keys as $key => $value){
+    if(!isset($conf[$key])){
+      $conf[$key] = $value;
+    }
+  }
+
+  return $conf;
+}
+
 /**
  * Render callback for the mapbox pane.
  */
 function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
+  $conf = _mapbox_pane_default_conf($conf);
 
   $block = new stdClass();
 
@@ -43,6 +77,7 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         $node,
         $conf['mapbox_id'],
         $conf['geo'],
+        $conf['mapbox_style'],
         $conf['type'],
         $conf['legend'],
         $conf['name'],
@@ -53,7 +88,15 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['marker_anchor'],
         array('enabled' => false),
         $conf['cluster'],
-        $conf['proximity']
+        $conf['cluster_max_zoom'],
+        $conf['cluster_radius'],
+        $conf['cluster_styles'],
+        $conf['cluster_text_color'],
+        $conf['proximity'],
+        FALSE,
+        FALSE,
+        NULL,
+        $conf['icon_multiplier']
       );
 
       // save to block content

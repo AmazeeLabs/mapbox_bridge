@@ -20,7 +20,7 @@
           // access token for mapbox
           mapboxgl.accessToken = setting.mapboxBridge.publicToken;
           Drupal.Mapbox.defaultIcon = "https://api.mapbox.com/v4/marker/pin-m.png?access_token=" + mapboxgl.accessToken;
-
+          
           var mapboxObj = {
             container: 'map', // container id
             style: setting.mapboxBridge.style,
