@@ -41,7 +41,7 @@ function _mapbox_pane_default_conf($conf){
     'legend' => FALSE,
     'custom_icon_width' => 0,
     'custom_icon_height' => 0,
-    'icon_multiplier' => 0.5
+    'custom_icon_multiplier' => 0.5
   ];
 
   foreach ($default_keys as $key => $value){
@@ -96,7 +96,7 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         FALSE,
         FALSE,
         NULL,
-        $conf['icon_multiplier']
+        $conf['custom_icon_multiplier']
       );
 
       // save to block content
@@ -141,6 +141,7 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
   $options['node']['node_teaser'] = t('Teaser');
 
   $conf = $form_state['conf'];
+  $conf = _mapbox_pane_default_conf($conf);
 
   $t_args = array('!mapbox' => l('www.mapbox.com/projects', 'https://www.mapbox.com/projects/', array('attributes' => array('target' => '_blank'))));
 
@@ -150,6 +151,14 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('ID of your Mapbox project: !mapbox', $t_args),
     '#default_value' => $conf['mapbox_id'],
     '#mandatory' => TRUE
+  );
+
+  $form['mapbox_style'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mapbox style'),
+    '#description' => t('The style/loop of the mapbox map, example: !link', array('!link' => l('here', 'https://docs.mapbox.com/mapbox-gl-js/example/setstyle/', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => $conf['mapbox_style'],
+    '#required' => TRUE,
   );
 
   $form['mapbox_max_zoom'] = array(
@@ -256,6 +265,56 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#mandatory' => TRUE
   );
 
+  $form['mapbox_marker']['cluster_max_zoom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cluster max zoom'),
+    '#size' => 3,
+    '#description' => t('The max zoom size for clusters before they stop grouping.'),
+    '#default_value' => $conf['cluster_max_zoom'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="cluster"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  $form['mapbox_marker']['cluster_radius'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cluster radius'),
+    '#size' => 3,
+    '#description' => t('The max radius size for clusters where markers will be grouped.'),
+    '#default_value' => $conf['cluster_radius'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="cluster"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  $form['mapbox_marker']['cluster_styles'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cluster styles'),
+    '#description' => t('Use step expressions to configure colour styles, separate each value with a comma. Example: !link', array('!link' => l(t('here'), 'https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#step', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => $conf['cluster_radius'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="cluster"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  $form['mapbox_marker']['cluster_text_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cluster text color'),
+    '#description' => t('The color of the text for the clusters.'),
+    '#default_value' => $conf['cluster_text_color'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="cluster"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
   $form['mapbox_marker']['proximity'] = array(
     '#type' => 'checkbox',
     '#title' => t('Proximity Search'),
@@ -299,6 +358,19 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#title' => t('Icon height'),
     '#description' => t('Icon height in pixels (needed for positioning)'),
     '#default_value' => $conf['custom_icon_height'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
+  );
+
+  $form['mapbox_type']['custom_icon_multiplier'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Icon multiplier'),
+    '#size' => 3,
+    '#description' => t('Icon multiplier how big or small to show the icon, example: 0.5 will be half the size.'),
+    '#default_value' => $conf['custom_icon_multiplier'],
     '#states' => array(
       'invisible' => array(
         ':input[name="type"]' => array('empty' => FALSE),
