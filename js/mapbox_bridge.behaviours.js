@@ -29,7 +29,6 @@
           if(setting.mapboxBridge.start_position){
             mapboxObj['center'] = setting.mapboxBridge.start_position.split(',');
           }
-          console.log(mapboxObj);
           // Load Mapbox with supplied ID
           Drupal.Mapbox.map = new mapboxgl.Map(mapboxObj);
 
