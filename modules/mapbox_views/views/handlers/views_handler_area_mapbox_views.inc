@@ -73,6 +73,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     ));
     $options['mapbox_max_zoom'] = array('default' => 12);
     $options['center'] = array('default' => '');
+    $options['start_position'] = array('default' => '48.864716,2.349014');
 
     return $options;
   }
@@ -125,7 +126,8 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->options['center'],
           FALSE,
           NULL,
-          $this->options['mapbox_type']['custom_icon_multiplier']
+          $this->options['mapbox_type']['custom_icon_multiplier'],
+          $this->options['start_position']
         );
         return $mapBuilder->getMap();
       }
@@ -172,6 +174,12 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Default Center'),
       '#description' => t('I entered, the map will center around the given coordinates, provide latitude and longitude like so: 13,37'),
       '#default_value' => $this->options['center'],
+    );
+    $form['start_position'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Start Position'),
+      '#description' => t('This is the default starting position of the map, provide latitude and longitude like so: 13,37. Default is set to 48.864716,2.349014 (Paris)'),
+      '#default_value' => $this->options['start_position'],
     );
     return $form;
   }

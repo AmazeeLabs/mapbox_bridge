@@ -83,15 +83,16 @@ class MapboxAreaBuilder {
    * @param bool $cluster
    * @param int $clusterMaxZoom
    * @param int $clusterRadius
-   * @param string[] $clusterStyles
+   * @param string $clusterStyles
    * @param string $clusterText
    * @param bool $proximity
    * @param bool $center
    * @param bool $marker_menu
    * @param null $menu_viewmode
    * @param float $icon_multiplier
+   * @param string $startPosition
    */
-  public function __construct($object, $mapboxId, $geofield, $style = 'mapbox://styles/mapbox/light-v10', $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $clusterMaxZoom = 14, $clusterRadius = 50, $clusterStyles = '#51bbd6, 2, #f1f075, 3, #f28cb1', $clusterText = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = NULL, $icon_multiplier = 0.5) {
+  public function __construct($object, $mapboxId, $geofield, $style = 'mapbox://styles/mapbox/light-v10', $markerTypeField = '', $legend = false, $symbolName = '', $symbolIcon = '', $max_zoom = 12, $popup = false, array $defaultIcon = array(), $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $clusterMaxZoom = 14, $clusterRadius = 50, $clusterStyles = '#51bbd6, 2, #f1f075, 3, #f28cb1', $clusterText = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = NULL, $icon_multiplier = 0.5, $startPosition = "48.864716,2.349014") {
     $this->object = $object;
     $this->mapboxId = $mapboxId;
     $this->geofield = $geofield;
@@ -116,6 +117,7 @@ class MapboxAreaBuilder {
     $this->marker_menu = $marker_menu;
     $this->menu_viewmode = $menu_viewmode;
     $this->icon_multiplier = (float)$icon_multiplier;
+    $this->startPosition = preg_replace("/\s+/", "", $startPosition);
   }
 
   /**
@@ -165,7 +167,7 @@ class MapboxAreaBuilder {
       $mapMarkers = $this->extractLegendsInfo($mapMarkers);
     }
 
-    return mapbox_bridge_render_map($this->mapboxId, $type, $mapMarkers, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor, $this->filter, $this->style, $this->cluster, $this->clusterMaxZoom, $this->clusterRadius, $this->clusterStyles, $this->clusterText, $this->proximity, $this->center, $this->marker_menu, $this->menu_viewmode, $this->icon_multiplier);
+    return mapbox_bridge_render_map($this->mapboxId, $type, $mapMarkers, $this->legend, $this->max_zoom, $this->popup, $this->markerAnchor, $this->filter, $this->style, $this->cluster, $this->clusterMaxZoom, $this->clusterRadius, $this->clusterStyles, $this->clusterText, $this->proximity, $this->center, $this->marker_menu, $this->menu_viewmode, $this->icon_multiplier, $this->startPosition);
   }
 
   /**

@@ -26,9 +26,10 @@
             style: setting.mapboxBridge.style,
             maxZoom: setting.mapboxBridge.maxZoom,
           }
-          if(setting.mapboxBridge.center){
-            mapboxObj['center'] = setting.mapboxBridge.center.split(',');
+          if(setting.mapboxBridge.start_position){
+            mapboxObj['center'] = setting.mapboxBridge.start_position.split(',');
           }
+          console.log(mapboxObj);
           // Load Mapbox with supplied ID
           Drupal.Mapbox.map = new mapboxgl.Map(mapboxObj);
 

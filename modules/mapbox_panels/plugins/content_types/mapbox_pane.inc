@@ -41,7 +41,8 @@ function _mapbox_pane_default_conf($conf){
     'legend' => FALSE,
     'custom_icon_width' => 0,
     'custom_icon_height' => 0,
-    'custom_icon_multiplier' => 0.5
+    'custom_icon_multiplier' => 0.5,
+    'start_position' => '48.864716,2.349014'
   ];
 
   foreach ($default_keys as $key => $value){
@@ -96,7 +97,8 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         FALSE,
         FALSE,
         NULL,
-        $conf['custom_icon_multiplier']
+        $conf['custom_icon_multiplier'],
+        $conf['start_position']
       );
 
       // save to block content
@@ -187,6 +189,13 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
       18 => 18,
     ),
     '#mandatory' => TRUE
+  );
+
+  $form['start_position'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Start Position'),
+    '#description' => t('This is the default starting position of the map, provide latitude and longitude like so: 13,37. Default is set to 48.864716,2.349014 (Paris)'),
+    '#default_value' => $conf['start_position'],
   );
 
   $form['mapbox_marker'] = array(
