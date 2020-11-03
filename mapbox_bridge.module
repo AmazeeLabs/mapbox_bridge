@@ -69,9 +69,13 @@ function mapbox_bridge_ajax_content($entity_type, $viewmode, $entity_id) {
  *
  * @param string $startPosition
  *
+ * @param bool $startZoom
+ *
+ * @param bool $fitBounds
+ *
  * @return string
  */
-function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $map_styles = 'mapbox://styles/mapbox/light-v10', $cluster = false, $cluster_max_zoom = 14, $cluster_radius = 50, $cluster_styles = array('#51bbd6','2','#f1f075','3','#f28cb1'), $cluster_text = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE, $icon_multiplier = 0.5, $startPosition = "48.864716,2.349014") {
+function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $map_styles = 'mapbox://styles/mapbox/light-v10', $cluster = false, $cluster_max_zoom = 14, $cluster_radius = 50, $cluster_styles = array('#51bbd6','2','#f1f075','3','#f28cb1'), $cluster_text = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE, $icon_multiplier = 0.5, $startPosition = "48.864716,2.349014", $startZoom = FALSE, $fitBounds = TRUE) {
   if ($map_id && $type) {
     // add mapbox.js files
     drupal_add_js('https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js', 'external');
@@ -110,12 +114,14 @@ function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false
       'clusterRadius' => $cluster_radius,
       'clusterStyles' => $cluster_styles,
       'cluster_text' => $cluster_text,
+      'fit_bounds' => $fitBounds,
       'iconMultiplier' => $icon_multiplier,
       'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
       'center' => $center,
       'marker_menu' => array('enabled' => $marker_menu, 'viewmode' => $menu_viewmode),
       'path_settings' => array('domain_variant' => !empty($_domain_variant) ? $_domain_variant->prefix : FALSE, 'language' => !empty($language->prefix) ? $language->prefix : FALSE),
-      'start_position' => $startPosition
+      'start_position' => $startPosition,
+      'start_zoom' => $startZoom
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic

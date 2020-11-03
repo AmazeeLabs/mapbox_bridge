@@ -27,7 +27,10 @@
             maxZoom: setting.mapboxBridge.maxZoom,
           }
           if(setting.mapboxBridge.start_position){
-            mapboxObj['center'] = setting.mapboxBridge.start_position.split(',');
+            mapboxObj['center'] = setting.mapboxBridge.start_position.split(',').reverse();
+          }
+          if(setting.mapboxBridge.start_zoom){
+            mapboxObj['zoom'] = setting.mapboxBridge.start_zoom;
           }
           // Load Mapbox with supplied ID
           Drupal.Mapbox.map = new mapboxgl.Map(mapboxObj);
@@ -110,18 +113,13 @@
       });
 
 
-      // set the pan & zoom of them map
-      if (setting.mapboxBridge.center) {
-        Drupal.Mapbox.map.flyTo({
-          center: setting.mapboxBridge.center.split(','),
-          zoom: setting.mapboxBridge.maxZoom
-        });
-      } else {
+      // if found bounds enabled
+      if(setting.mapboxBridge.fit_bounds) {
         var bounds = new mapboxgl.LngLatBounds();
-        Drupal.Mapbox.geojson.forEach(function(marker, index){
+        Drupal.Mapbox.geojson.forEach(function (marker, index) {
           bounds.extend(marker.geometry.coordinates);
-        })
-        Drupal.Mapbox.map.fitBounds(bounds, { maxZoom: setting.mapboxBridge.maxZoom, padding: 70 });
+        });
+        Drupal.Mapbox.map.fitBounds(bounds, {maxZoom: setting.mapboxBridge.maxZoom, padding: 70});
       }
 
       // add the legend if necessary

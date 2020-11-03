@@ -101,6 +101,18 @@ class views_plugin_style_mapbox extends views_plugin_style {
       'default' => 0.5,
       'translatable' => FALSE
     );
+    $options['start_position'] = array(
+      'default' => '48.864716,2.349014',
+      'translatable' => FALSE
+    );
+    $options['start_zoom'] = array(
+      'default' => '',
+      'translatable' => FALSE
+    );
+    $options['fit_bounds'] = array(
+      'default' => TRUE,
+      'translatable' => FALSE
+    );
     return $options;
   }
 
@@ -135,6 +147,48 @@ class views_plugin_style_mapbox extends views_plugin_style {
       '#description' => t('The style/loop of the mapbox map, example: !link', array('!link' => l('here', 'https://docs.mapbox.com/mapbox-gl-js/example/setstyle/', array('attributes' => array('target' => '_blank'))))),
       '#default_value' => $this->options['mapbox_style'],
       '#required' => TRUE,
+    );
+
+    $form['start_position'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Start Position'),
+      '#description' => t('This is the default starting position of the map, provide latitude and longitude like so: 13,37. Default is set to 48.864716,2.349014 (Paris)'),
+      '#default_value' => $this->options['start_position'],
+    );
+
+    $form['start_zoom'] = array(
+      '#type' => 'select',
+      '#title' => t('Starting zoom level'),
+      '#description' => t('The start level of zoom (the higher the level, the closer)'),
+      '#default_value' => $this->options['start_zoom'],
+      '#options' => array(
+        '' => t('Not set'),
+        1 => 1,
+        2 => 2,
+        3 => 3,
+        4 => 4,
+        5 => 5,
+        6 => 6,
+        7 => 7,
+        8 => 8,
+        9 => 9,
+        10 => 10,
+        11 => 11,
+        12 => 12,
+        13 => 13,
+        14 => 14,
+        15 => 15,
+        16 => 16,
+        17 => 17,
+        18 => 18,
+      ),
+    );
+
+    $form['fit_bounds'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Fit bounds'),
+      '#description' => t('If flagged the map will be zoomed out and positioned so that all markers are displayed, this will override the start position and zoom.'),
+      '#default_value' => $this->options['fit_bounds'],
     );
 
     // The zoom level.
@@ -451,7 +505,12 @@ class views_plugin_style_mapbox extends views_plugin_style {
       $this->options['marker_cluster_text_color'],
       $this->options['marker_proximity_search'],
       $this->options['center'],
-      $this->options['marker_icon_multiplier']
+      FALSE,
+      NULL,
+      $this->options['marker_icon_multiplier'],
+      $this->options['start_position'],
+      $this->options['start_zoom'],
+      $this->options['fit_bounds']
     );
 
     return $mapBuilder->getMap();

@@ -42,7 +42,9 @@ function _mapbox_pane_default_conf($conf){
     'custom_icon_width' => 0,
     'custom_icon_height' => 0,
     'custom_icon_multiplier' => 0.5,
-    'start_position' => '48.864716,2.349014'
+    'start_position' => '48.864716,2.349014',
+    'start_zoom' => '',
+    'fit_bounds' => TRUE
   ];
 
   foreach ($default_keys as $key => $value){
@@ -98,7 +100,9 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         FALSE,
         NULL,
         $conf['custom_icon_multiplier'],
-        $conf['start_position']
+        $conf['start_position'],
+        $conf['start_zoom'],
+        $conf['fit_bounds']
       );
 
       // save to block content
@@ -196,6 +200,41 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#title' => t('Start Position'),
     '#description' => t('This is the default starting position of the map, provide latitude and longitude like so: 13,37. Default is set to 48.864716,2.349014 (Paris)'),
     '#default_value' => $conf['start_position'],
+  );
+
+  $form['start_zoom'] = array(
+    '#type' => 'select',
+    '#title' => t('Starting zoom level'),
+    '#description' => t('The start level of zoom (the higher the level, the closer)'),
+    '#default_value' => $conf['start_zoom'],
+    '#options' => array(
+      '' => t('Not set'),
+      1 => 1,
+      2 => 2,
+      3 => 3,
+      4 => 4,
+      5 => 5,
+      6 => 6,
+      7 => 7,
+      8 => 8,
+      9 => 9,
+      10 => 10,
+      11 => 11,
+      12 => 12,
+      13 => 13,
+      14 => 14,
+      15 => 15,
+      16 => 16,
+      17 => 17,
+      18 => 18,
+    ),
+  );
+
+  $form['fit_bounds'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Fit bounds'),
+    '#description' => t('If flagged the map will be zoomed out and positioned so that all markers are displayed, this will override the start position and zoom.'),
+    '#default_value' => $conf['fit_bounds'],
   );
 
   $form['mapbox_marker'] = array(
