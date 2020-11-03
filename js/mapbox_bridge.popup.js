@@ -6,58 +6,61 @@
    * @see http://leafletjs.com/reference.html#popup
    */
   Drupal.MapboxPopup = {
-    popups: function (layers, viewmode, settings) {
-      // go through each group, then through each layer
-      layers.eachLayer(function(layer) {
+    load: function (map, layerName, settings){
+      map.on('click', layerName, function (e) {
+        var coordinates = e.features[0].geometry.coordinates.slice();
+        var entityId = e.features[0].properties.popup_entity_id;
+        if(e.features[0].properties.type === "custom"){
+          entityId = e.features[0].properties.nid;
+        }
 
-        // This is an empty container that we will replace via ajax
-        var content = '<div class="custom-popup-content loading" id="custom-popup-id-' + layer._leaflet_id + '"><\/div>';
+        var className = 'custom-popup-id-' + entityId;
 
-        // setup a minimum with for the popup, see http://leafletjs.com/reference.html#popup for other options
-        layer.bindPopup(content, {
-          minWidth: 150,
-          className: 'popup-nid-' + layer.feature.properties.nid
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+
+        var height = 0;
+        var topOffset = 70 / 2;
+        var data = $.parseJSON(settings.data);
+        if(typeof data[0] !== 'undefined' && data[0].iconHeight){
+          height = data[0].iconHeight;
+        }
+        if(height > 0) {
+          topOffset = (height * settings.iconMultiplier) / 2;
+        }
+        var popup = new mapboxgl.Popup({
+          className: 'custom-popup-content loading ' + className,
+          anchor: 'bottom-left',
+          offset: [0, -topOffset],
+        }).setLngLat(coordinates)
+          .setHTML('')
+          .addTo(map);
+
+        map.flyTo({
+          center: e.features[0].geometry.coordinates
         });
 
-        Drupal.Mapbox.map.on('popupopen', function(e) {
-          Drupal.MapboxPopup.activePopup = e;
-
-          $('#custom-popup-id-' + layer._leaflet_id).once(function(){
-
-            // get the marker
-            if (typeof e.popup._source != 'undefined') {
-              marker = e.popup._source;
-            }
-
-            Drupal.MapboxContent.load('#custom-popup-id-' + marker._leaflet_id, marker, settings, function($this){
-              // check if we are handling a popup
-              var $content = $('> div:first-child', $this);
-
-              // gracefully slide in the content
-              $content
-                .css({
-                  width: $this.width() + 'px', // to fix jQuery's jumpy sliding effect
-                  opacity: 0
-                })
-                .slideDown('fast').after(function(){
-                  $content.animate({
-                    opacity: 1
-                  }, 'normal');
-                });
-
-              // center the newly clicked marker
-              var px = Drupal.Mapbox.map.project(marker._latlng); // find the pixel location on the map where the popup anchor is
-              px.y -= marker._popup._container.clientHeight / 2; // find the height of the popup container, divide by 2, subtract from the Y axis of marker location
-
-              // panTo
-              if (settings.popup.panTo) {
-                Drupal.Mapbox.map.panTo( marker.getLatLng() );
-              } else {
-                Drupal.Mapbox.map.panTo( Drupal.Mapbox.map.unproject(px) );
-              }
-            });
+        setTimeout(function (){
+          Drupal.MapboxContent.load('.'+className, entityId, settings).then(function (data){;
+            popup.setHTML(data.html);
+            data.element.removeClass('loading');
+          }).catch(function (error){
+            popup.setHTML(error.status);
+            error.element.removeClass('loading');
+            console.error(error);
           });
-        });
+        },500);
+      });
+
+      // Change the cursor to a pointer when the mouse is over the places layer.
+      map.on('mouseenter', layerName, function () {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      // Change it back to a pointer when it leaves.
+      map.on('mouseleave', layerName, function () {
+        map.getCanvas().style.cursor = '';
       });
     }
   };

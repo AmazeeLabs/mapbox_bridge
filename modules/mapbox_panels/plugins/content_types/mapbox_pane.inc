@@ -20,10 +20,47 @@ $plugin = array(
   'required context' => new ctools_context_required(t('Node'), 'node'),
 );
 
+function _mapbox_pane_default_conf($conf){
+  $default_keys =[
+    'mapbox_id' => NULL,
+    'geo' => NULL,
+    'mapbox_style' => 'mapbox://styles/mapbox/light-v10',
+    'mapbox_max_zoom' => 12,
+    'custom_icon_src' => '',
+    'name' => '',
+    'icon' => '',
+    'popup_viewmode' => '',
+    'cluster_max_zoom' => 12,
+    'cluster_radius' => 14,
+    'cluster_styles' => '#51bbd6,2,#f1f075,3,#f28cb1',
+    'cluster_text_color' => '#FFFFFF',
+    'marker_anchor' => 'center_center',
+    'proximity' => FALSE,
+    'cluster' => FALSE,
+    'popup' => FALSE,
+    'legend' => FALSE,
+    'custom_icon_width' => 0,
+    'custom_icon_height' => 0,
+    'custom_icon_multiplier' => 0.5,
+    'start_position' => '48.864716,2.349014',
+    'start_zoom' => '',
+    'fit_bounds' => TRUE
+  ];
+
+  foreach ($default_keys as $key => $value){
+    if(!isset($conf[$key])){
+      $conf[$key] = $value;
+    }
+  }
+
+  return $conf;
+}
+
 /**
  * Render callback for the mapbox pane.
  */
 function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
+  $conf = _mapbox_pane_default_conf($conf);
 
   $block = new stdClass();
 
@@ -43,6 +80,7 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         $node,
         $conf['mapbox_id'],
         $conf['geo'],
+        $conf['mapbox_style'],
         $conf['type'],
         $conf['legend'],
         $conf['name'],
@@ -53,7 +91,18 @@ function mapbox_pane_render_pane($subtype, $conf, $args, $context) {
         $conf['marker_anchor'],
         array('enabled' => false),
         $conf['cluster'],
-        $conf['proximity']
+        $conf['cluster_max_zoom'],
+        $conf['cluster_radius'],
+        $conf['cluster_styles'],
+        $conf['cluster_text_color'],
+        $conf['proximity'],
+        FALSE,
+        FALSE,
+        NULL,
+        $conf['custom_icon_multiplier'],
+        $conf['start_position'],
+        $conf['start_zoom'],
+        $conf['fit_bounds']
       );
 
       // save to block content
@@ -98,6 +147,7 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
   $options['node']['node_teaser'] = t('Teaser');
 
   $conf = $form_state['conf'];
+  $conf = _mapbox_pane_default_conf($conf);
 
   $t_args = array('!mapbox' => l('www.mapbox.com/projects', 'https://www.mapbox.com/projects/', array('attributes' => array('target' => '_blank'))));
 
@@ -107,6 +157,14 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#description' => t('ID of your Mapbox project: !mapbox', $t_args),
     '#default_value' => $conf['mapbox_id'],
     '#mandatory' => TRUE
+  );
+
+  $form['mapbox_style'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mapbox style'),
+    '#description' => t('The style/loop of the mapbox map, example: !link', array('!link' => l('here', 'https://docs.mapbox.com/mapbox-gl-js/example/setstyle/', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => $conf['mapbox_style'],
+    '#required' => TRUE,
   );
 
   $form['mapbox_max_zoom'] = array(
@@ -135,6 +193,48 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
       18 => 18,
     ),
     '#mandatory' => TRUE
+  );
+
+  $form['start_position'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Start Position'),
+    '#description' => t('This is the default starting position of the map, provide latitude and longitude like so: 13,37. Default is set to 48.864716,2.349014 (Paris)'),
+    '#default_value' => $conf['start_position'],
+  );
+
+  $form['start_zoom'] = array(
+    '#type' => 'select',
+    '#title' => t('Starting zoom level'),
+    '#description' => t('The start level of zoom (the higher the level, the closer)'),
+    '#default_value' => $conf['start_zoom'],
+    '#options' => array(
+      '' => t('Not set'),
+      1 => 1,
+      2 => 2,
+      3 => 3,
+      4 => 4,
+      5 => 5,
+      6 => 6,
+      7 => 7,
+      8 => 8,
+      9 => 9,
+      10 => 10,
+      11 => 11,
+      12 => 12,
+      13 => 13,
+      14 => 14,
+      15 => 15,
+      16 => 16,
+      17 => 17,
+      18 => 18,
+    ),
+  );
+
+  $form['fit_bounds'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Fit bounds'),
+    '#description' => t('If flagged the map will be zoomed out and positioned so that all markers are displayed, this will override the start position and zoom.'),
+    '#default_value' => $conf['fit_bounds'],
   );
 
   $form['mapbox_marker'] = array(
@@ -213,6 +313,56 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#mandatory' => TRUE
   );
 
+  $form['mapbox_marker']['cluster_max_zoom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cluster max zoom'),
+    '#size' => 3,
+    '#description' => t('The max zoom size for clusters before they stop grouping.'),
+    '#default_value' => $conf['cluster_max_zoom'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="cluster"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  $form['mapbox_marker']['cluster_radius'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cluster radius'),
+    '#size' => 3,
+    '#description' => t('The max radius size for clusters where markers will be grouped.'),
+    '#default_value' => $conf['cluster_radius'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="cluster"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  $form['mapbox_marker']['cluster_styles'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cluster styles'),
+    '#description' => t('Use step expressions to configure colour styles, separate each value with a comma. Example: !link', array('!link' => l(t('here'), 'https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#step', array('attributes' => array('target' => '_blank'))))),
+    '#default_value' => $conf['cluster_radius'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="cluster"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  $form['mapbox_marker']['cluster_text_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cluster text color'),
+    '#description' => t('The color of the text for the clusters.'),
+    '#default_value' => $conf['cluster_text_color'],
+    '#states' => array(
+      'invisible' => array(
+        'input[name="cluster"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
   $form['mapbox_marker']['proximity'] = array(
     '#type' => 'checkbox',
     '#title' => t('Proximity Search'),
@@ -230,7 +380,7 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
   $form['mapbox_type']['custom_icon_src'] = array(
     '#type' => 'textfield',
     '#title' => t('Local path'),
-    '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin'),
+    '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin') . "<br><strong>".t('Currently only supports PNG or JPEG.')."</strong>",
     '#default_value' => $conf['custom_icon_src'],
     '#states' => array(
       'invisible' => array(
@@ -256,6 +406,19 @@ function mapbox_pane_content_type_edit_form($form, &$form_state) {
     '#title' => t('Icon height'),
     '#description' => t('Icon height in pixels (needed for positioning)'),
     '#default_value' => $conf['custom_icon_height'],
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="type"]' => array('empty' => FALSE),
+      )
+    )
+  );
+
+  $form['mapbox_type']['custom_icon_multiplier'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Icon multiplier'),
+    '#size' => 3,
+    '#description' => t('Icon multiplier how big or small to show the icon, example: 0.5 will be half the size.'),
+    '#default_value' => $conf['custom_icon_multiplier'],
     '#states' => array(
       'invisible' => array(
         ':input[name="type"]' => array('empty' => FALSE),

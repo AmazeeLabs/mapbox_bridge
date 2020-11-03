@@ -45,11 +45,35 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $options = parent::option_definition();
     unset($options['label']);
     $options['mapbox_id'] = array('default' => '');
-    $options['mapbox_marker'] = array('default' => array('geo' => '', 'type' => 'none', 'type_field' => '', 'legend' => '', 'marker_anchor' => 'center_center', 'cluster' => '', 'proximity' => ''));
-    $options['mapbox_popup'] = array('default' => array('popup' => FALSE, 'popup_viewmode' => 'teaser'));
-    $options['mapbox_type'] = array('default' => array('name' => '', 'icon' => '', 'custom_icon_src' => '', 'custom_icon_width' => '', 'custom_icon_height' => ''));
+    $options['mapbox_style'] = array('default' => 'mapbox://styles/mapbox/light-v10');
+    $options['mapbox_marker'] = array('default' => array(
+      'geo' => '',
+      'type' => 'none',
+      'type_field' => '',
+      'legend' => '',
+      'marker_anchor' => 'center_center',
+      'cluster' => '',
+      'cluster_max_zoom' => 14,
+      'cluster_radius' => 50,
+      'cluster_styles' => '#51bbd6,2,#f1f075,3,#f28cb1',
+      'cluster_text_color' => '#FFFFFF',
+      'proximity' => ''
+    ));
+    $options['mapbox_popup'] = array('default' => array(
+      'popup' => FALSE,
+      'popup_viewmode' => 'teaser'
+    ));
+    $options['mapbox_type'] = array('default' => array(
+      'name' => '',
+      'icon' => '',
+      'custom_icon_src' => '',
+      'custom_icon_width' => '',
+      'custom_icon_height' => '',
+      'custom_icon_multiplier' => 0.5
+    ));
     $options['mapbox_max_zoom'] = array('default' => 12);
     $options['center'] = array('default' => '');
+    $options['start_position'] = array('default' => '48.864716,2.349014');
 
     return $options;
   }
@@ -76,6 +100,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->view,
           $this->options['mapbox_id'],
           $this->options['mapbox_marker']['geo'],
+          $this->options['mapbox_style'],
           $this->options['mapbox_marker']['type_field'],
           $this->options['mapbox_marker']['legend'],
           $this->options['mapbox_type']['name'],
@@ -93,8 +118,16 @@ class views_handler_area_mapbox_views extends views_handler_area {
           $this->options['mapbox_marker']['marker_anchor'],
           array('enabled' => false),
           $this->options['mapbox_marker']['cluster'],
+          $this->options['mapbox_marker']['cluster_max_zoom'],
+          $this->options['mapbox_marker']['cluster_radius'],
+          $this->options['mapbox_marker']['cluster_styles'],
+          $this->options['mapbox_marker']['cluster_text_color'],
           $this->options['mapbox_marker']['proximity'],
-          $this->options['center']
+          $this->options['center'],
+          FALSE,
+          NULL,
+          $this->options['mapbox_type']['custom_icon_multiplier'],
+          $this->options['start_position']
         );
         return $mapBuilder->getMap();
       }
@@ -121,6 +154,13 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#default_value' => $this->options['mapbox_id'],
       '#mandatory' => TRUE
     );
+    $form['mapbox_style'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Mapbox style'),
+      '#description' => t('The style/loop of the mapbox map, example: !link', array('!link' => l('here', 'https://docs.mapbox.com/mapbox-gl-js/example/setstyle/', array('attributes' => array('target' => '_blank'))))),
+      '#default_value' => $this->options['mapbox_style'],
+      '#required' => TRUE,
+    );
     $form['mapbox_max_zoom'] = array(
       '#type' => 'select',
       '#title' => t('Max zoom level'),
@@ -134,6 +174,12 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Default Center'),
       '#description' => t('I entered, the map will center around the given coordinates, provide latitude and longitude like so: 13,37'),
       '#default_value' => $this->options['center'],
+    );
+    $form['start_position'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Start Position'),
+      '#description' => t('This is the default starting position of the map, provide latitude and longitude like so: 13,37. Default is set to 48.864716,2.349014 (Paris)'),
+      '#default_value' => $this->options['start_position'],
     );
     return $form;
   }
@@ -223,6 +269,56 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#mandatory' => TRUE
     );
 
+    $form['mapbox_marker']['cluster_max_zoom'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cluster max zoom'),
+      '#size' => 3,
+      '#description' => t('The max zoom size for clusters before they stop grouping.'),
+      '#default_value' => $this->options['mapbox_marker']['cluster_max_zoom'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('cluster_disabled'),
+        )
+      )
+    );
+
+    $form['mapbox_marker']['cluster_radius'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cluster radius'),
+      '#size' => 3,
+      '#description' => t('The max radius size for clusters where markers will be grouped.'),
+      '#default_value' => $this->options['mapbox_marker']['cluster_radius'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('cluster_disabled'),
+        )
+      )
+    );
+
+    $form['mapbox_marker']['cluster_styles'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cluster styles'),
+      '#description' => t('Use step expressions to configure colour styles, separate each value with a comma. Example: !link', array('!link' => l(t('here'), 'https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#step', array('attributes' => array('target' => '_blank'))))),
+      '#default_value' => $this->options['mapbox_marker']['cluster_styles'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('cluster_disabled'),
+        )
+      )
+    );
+
+    $form['mapbox_marker']['cluster_text_color'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cluster text color'),
+      '#description' => t('The color of the text for the clusters.'),
+      '#default_value' => $this->options['mapbox_marker']['cluster_styles'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('cluster_disabled'),
+        )
+      )
+    );
+
     $form['mapbox_marker']['proximity'] = array(
       '#type' => 'checkbox',
       '#title' => t('Proximity Search'),
@@ -272,7 +368,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
     $form['mapbox_type']['custom_icon_src'] = array(
       '#type' => 'textfield',
       '#title' => t('Local path'),
-      '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin'),
+      '#description' => t('Path to an image that will be used as a marker pin. E.g.: sites/all/themes/omega/pin') . "<br><strong>".t('Currently only supports PNG or JPEG.')."</strong>",
       '#default_value' => $this->options['mapbox_type']['custom_icon_src'],
       '#states' => array(
         'invisible' => array(
@@ -296,6 +392,18 @@ class views_handler_area_mapbox_views extends views_handler_area {
       '#title' => t('Icon width'),
       '#description' => t('Icon height in pixels (needed for positioning)'),
       '#default_value' => $this->options['mapbox_type']['custom_icon_height'],
+      '#states' => array(
+        'invisible' => array(
+          $this->formState('marker_type_taxonomy'),
+        )
+      )
+    );
+    $form['mapbox_type']['custom_icon_multiplier'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Icon multiplier'),
+      '#size' => 3,
+      '#description' => t('Icon multiplier how big or small to show the icon, example: 0.5 will be half the size.'),
+      '#default_value' => $this->options['mapbox_type']['custom_icon_multiplier'],
       '#states' => array(
         'invisible' => array(
           $this->formState('marker_type_taxonomy'),
@@ -381,6 +489,7 @@ class views_handler_area_mapbox_views extends views_handler_area {
       'marker_type_none' => array(':input[name="options[mapbox_marker][type]"]' => array('value' => 'none')),
       'marker_type_taxonomy' => array(':input[name="options[mapbox_marker][type]"]' => array('value' => 'taxonomy')),
       'popup_disabled' => array(':input[name="options[mapbox_popup][popup]"]' => array('checked' => FALSE)),
+      'cluster_disabled' => array(':input[name="options[mapbox_marker][cluster]"]' => array('checked' => FALSE))
     );
     return $states[$name];
   }

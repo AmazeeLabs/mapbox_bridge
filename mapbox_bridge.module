@@ -46,19 +46,40 @@ function mapbox_bridge_ajax_content($entity_type, $viewmode, $entity_id) {
 /**
  *
  * Custom function to draw the map
- * */
-function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $cluster = false, $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE) {
+ *
+ * @param $map_id
+ * @param $type
+ * @param bool $data
+ * @param bool $legend
+ * @param int $max_zoom
+ * @param bool $popup
+ * @param string $markerAnchor
+ * @param false[] $filter
+ * @param string $map_styles
+ * @param bool $cluster
+ * @param int $cluster_max_zoom
+ * @param int $cluster_radius
+ * @param string[] $cluster_styles
+ * @param string $cluster_text
+ * @param bool $proximity
+ * @param bool $center
+ * @param bool $marker_menu
+ * @param bool $menu_viewmode
+ * @param float $icon_multiplier
+ *
+ * @param string $startPosition
+ *
+ * @param bool $startZoom
+ *
+ * @param bool $fitBounds
+ *
+ * @return string
+ */
+function mapbox_bridge_render_map($map_id, $type, $data = false, $legend = false, $max_zoom = 12, $popup = false, $markerAnchor = 'center_center', $filter = array('enabled' => false), $map_styles = 'mapbox://styles/mapbox/light-v10', $cluster = false, $cluster_max_zoom = 14, $cluster_radius = 50, $cluster_styles = array('#51bbd6','2','#f1f075','3','#f28cb1'), $cluster_text = '#FFFFFF', $proximity = false, $center = FALSE, $marker_menu = FALSE, $menu_viewmode = FALSE, $icon_multiplier = 0.5, $startPosition = "48.864716,2.349014", $startZoom = FALSE, $fitBounds = TRUE) {
   if ($map_id && $type) {
     // add mapbox.js files
-    drupal_add_js('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js', 'external');
-    drupal_add_css('https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css', 'external');
-
-    // cluster files
-    if ($cluster) {
-      drupal_add_js('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js', 'external');
-      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css', 'external');
-      drupal_add_css('https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css', 'external');
-    }
+    drupal_add_js('https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js', 'external');
+    drupal_add_css('https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css', 'external');
 
     // add chosen library
     if (module_exists('chosen')) {
@@ -87,11 +108,20 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
       'popup' => $popup,
       'markerAnchor' => $markerAnchor,
       'filter' => $filter,
+      'style' => $map_styles,
       'cluster' => $cluster,
+      'clusterMaxZoom' => $cluster_max_zoom,
+      'clusterRadius' => $cluster_radius,
+      'clusterStyles' => $cluster_styles,
+      'cluster_text' => $cluster_text,
+      'fit_bounds' => $fitBounds,
+      'iconMultiplier' => $icon_multiplier,
       'proximity' => array('enabled' => $proximity, 'label' => t('Proximity search')),
       'center' => $center,
       'marker_menu' => array('enabled' => $marker_menu, 'viewmode' => $menu_viewmode),
-      'path_settings' => array('domain_variant' => !empty($_domain_variant) ? $_domain_variant->prefix : FALSE, 'language' => !empty($language->prefix) ? $language->prefix : FALSE)
+      'path_settings' => array('domain_variant' => !empty($_domain_variant) ? $_domain_variant->prefix : FALSE, 'language' => !empty($language->prefix) ? $language->prefix : FALSE),
+      'start_position' => $startPosition,
+      'start_zoom' => $startZoom
     )), 'setting');
 
     // add mapbox_bridge.behaviours.js which contains the main logic
@@ -99,6 +129,7 @@ function mapbox_bridge_render_map($map_id, $data = false, $type, $legend = false
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.popup.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.panControls.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.filter.js', array('group' => JS_LIBRARY, 'weight' => -1));
+    drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.cluster.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.behaviours.js', array('group' => JS_LIBRARY, 'weight' => -1));
     drupal_add_js(drupal_get_path('module', 'mapbox_bridge') . '/js/mapbox_bridge.marker_menu.js', array('group' => JS_LIBRARY, 'weight' => -1));
 

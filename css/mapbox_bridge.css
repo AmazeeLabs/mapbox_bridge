@@ -9,17 +9,17 @@
 }
 
 /* Popup styles */
-.custom-popup-content {
-  min-height: 32px;
+.custom-popup-content .mapboxgl-popup-content{
+  min-height: 40px;
 }
-.custom-popup-content.loading {
-  background: url(../img/throbber.gif) no-repeat;
+.custom-popup-content.loading .mapboxgl-popup-content{
+  min-height: 60px;
+}
+.custom-popup-content.loading .mapboxgl-popup-content {
+  background-image: url(../img/throbber.gif);
   background-position: center;
-}
-
-/* hide it so we can show it in a fancy way */
-.custom-popup-content.loading > div:first-child {
-  display: none;
+  background-color: #FFF;
+  background-repeat: no-repeat;
 }
 
 /* pan controls */

@@ -1,27 +1,51 @@
 (function ($) {
 
   Drupal.Mapbox = {};
+  Drupal.Mapbox.defaultIcon = '';
   Drupal.Mapbox.icons = {};
   Drupal.Mapbox.layers = {};
   Drupal.Mapbox.filters = {};
   Drupal.Mapbox.geojson = [];
-  Drupal.Mapbox.featureLayer;
-  Drupal.Mapbox.layerGroup;
+  Drupal.Mapbox.sourceData;
+  Drupal.Mapbox.layerData;
 
   /**
    * Mapbox with very basic setup
    */
   Drupal.behaviors.mapboxBridge = {
     attach: function(context, setting) {
-      if (typeof L != 'undefined' && $('#map', context).length) {
+      if (typeof mapboxgl != 'undefined' && $('#map', context).length) {
         $('#map', context).once('mapbox-bridge', function(){
 
           // access token for mapbox
-          L.mapbox.accessToken = setting.mapboxBridge.publicToken;
+          mapboxgl.accessToken = setting.mapboxBridge.publicToken;
+          Drupal.Mapbox.defaultIcon = "https://api.mapbox.com/v4/marker/pin-m.png?access_token=" + mapboxgl.accessToken;
 
+          var mapboxObj = {
+            container: 'map', // container id
+            style: setting.mapboxBridge.style,
+            maxZoom: setting.mapboxBridge.maxZoom,
+          }
+          if(setting.mapboxBridge.start_position){
+            mapboxObj['center'] = setting.mapboxBridge.start_position.split(',').reverse();
+          }
+          if(setting.mapboxBridge.start_zoom){
+            mapboxObj['zoom'] = setting.mapboxBridge.start_zoom;
+          }
           // Load Mapbox with supplied ID
-          Drupal.Mapbox.map = L.mapbox.map('map', setting.mapboxBridge.mapId);
-          Drupal.Mapbox.map.scrollWheelZoom.disable();
+          Drupal.Mapbox.map = new mapboxgl.Map(mapboxObj);
+
+          // disable some scroll/touch/drag features
+          Drupal.Mapbox.map.scrollZoom.disable();
+          Drupal.Mapbox.map.dragRotate.disable();
+          Drupal.Mapbox.map.touchZoomRotate.disableRotation();
+
+          // add in zoom controls
+          var nav = new mapboxgl.NavigationControl({
+            showCompass: false,
+            showZoom: true
+          });
+          Drupal.Mapbox.map.addControl(nav, "top-left");
 
           // Wait until Mapbox is loaded
           Drupal.Mapbox.map.on('load', function() {
@@ -40,69 +64,83 @@
      * Initialize base settings
      * */
     init: function(data, context, setting) {
-      // refresh any current data
+      // // refresh any current data
       Drupal.behaviors.mapboxBridge.refresh();
 
-      // add markers
+      // // add markers
       $.each(data, function(index, markerData){
         Drupal.behaviors.mapboxBridge.addMarker(markerData, setting.mapboxBridge);
       });
 
-      // use the created geojson to load all the markers
-      Drupal.Mapbox.featureLayer = L.mapbox.featureLayer(Drupal.Mapbox.geojson);
-
-      // Set a custom icon on each marker based on feature properties.
-      Drupal.Mapbox.map.on('layeradd', function(e) {
-        var marker = e.layer,
-            feature = marker.feature;
-
-        if (typeof feature != 'undefined') {
-          marker.setIcon(L.icon(feature.properties.icon));
+      // Use the created geojson to load to create a new source data
+      // this is all the data of the markers generated in the loop above.
+      Drupal.Mapbox.map.addSource('marker-data', {
+        type: 'geojson', // specify the kind of data being added
+        cluster: setting.mapboxBridge.cluster ? true : false,// have to force a boolean as get invalid number otherwise
+        clusterMaxZoom: setting.mapboxBridge.clusterMaxZoom, // Max zoom to cluster points on
+        clusterRadius: setting.mapboxBridge.clusterRadius, // Radius of each cluster when clustering points (defaults to 50)
+        data: {
+          type: 'FeatureCollection',
+          features: Drupal.Mapbox.geojson
         }
       });
+      Drupal.Mapbox.sourceData = Drupal.Mapbox.map.getSource('marker-data');
 
-      // wrap everything in a layerGroup
-      Drupal.Mapbox.layerGroup = L.layerGroup();
-
-      if (setting.mapboxBridge.cluster) {
-
-        // create clusterGroup and add it to the map
-        var clusterGroup = new L.MarkerClusterGroup().addTo(Drupal.Mapbox.layerGroup);
-
-        // add the featureLayer containing all the markers to the clusterGroup (so clustering happens)
-        Drupal.Mapbox.featureLayer.addTo(clusterGroup);
-      } else {
-
-        // add the featureLayer containing all the markers to the map
-        Drupal.Mapbox.featureLayer.addTo(Drupal.Mapbox.layerGroup);
+      if(setting.mapboxBridge.cluster) {
+        Drupal.MapboxCluster.setup(Drupal.Mapbox.map,'marker-data', setting)
       }
 
-      // add the layerGroup to the map
-      Drupal.Mapbox.layerGroup.addTo(Drupal.Mapbox.map);
+      // unclustered style with custom icons images
+      var imageURL = Drupal.Mapbox.defaultIcon // default
+      if(typeof data[0] !== 'undefined' && data[0].icon){
+        imageURL = data[0].icon;
+      }
+      Drupal.Mapbox.map.loadImage(imageURL, function(error, image) { //this is where we load the image file
+        if (error) throw error;
+        Drupal.Mapbox.map.addImage("marker-image", image); //this is where we name the image file we are loading
+        Drupal.Mapbox.map.addLayer({
+          id: 'unclustered-point',
+          type: 'symbol',
+          source: 'marker-data',
+          filter: ['!', ['has', 'point_count']],
+          'layout': {
+            "icon-image": "marker-image", // the name of image file we used above
+            "icon-allow-overlap": setting.mapboxBridge.cluster ? false : true,
+            "icon-size": setting.mapboxBridge.iconMultiplier //this is a multiplier applied to the standard size. So if you want it half the size put ".5"
+          }
+        });
+        Drupal.Mapbox.layerData = Drupal.Mapbox.map.getLayer('unclustered-point');
+      });
 
-      // set the pan & zoom of them map
-      if (setting.mapboxBridge.center) {
-        Drupal.Mapbox.map.setView(setting.mapboxBridge.center.split(','), setting.mapboxBridge.maxZoom);
-      } else {
-        Drupal.Mapbox.map.fitBounds(Drupal.Mapbox.featureLayer.getBounds(), { maxZoom: setting.mapboxBridge.maxZoom });
+
+      // if found bounds enabled
+      if(setting.mapboxBridge.fit_bounds) {
+        var bounds = new mapboxgl.LngLatBounds();
+        Drupal.Mapbox.geojson.forEach(function (marker, index) {
+          bounds.extend(marker.geometry.coordinates);
+        });
+        Drupal.Mapbox.map.fitBounds(bounds, {maxZoom: setting.mapboxBridge.maxZoom, padding: 70});
       }
 
       // add the legend if necessary
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.legend) {
         Drupal.behaviors.mapboxBridge.addLegend(setting, data);
       }
 
       // create the popups
       if (setting.mapboxBridge.popup.enabled) {
-        Drupal.MapboxPopup.popups(Drupal.Mapbox.featureLayer, setting.mapboxBridge.popup.popup_viewmode, setting.mapboxBridge);
+        Drupal.MapboxPopup.load(Drupal.Mapbox.map, 'unclustered-point', setting.mapboxBridge);
       }
 
       // create filters
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.filter.enabled) {
         Drupal.MapboxFilter.filter(Drupal.Mapbox.featureLayer, setting.mapboxBridge.cluster, context, setting);
       }
 
       // create menu
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.marker_menu.enabled) {
         Drupal.MapboxMenu.setup(Drupal.Mapbox.featureLayer, context, setting);
       }
@@ -113,7 +151,9 @@
       }
 
       // enable proximity search
+      // TODO: This will not work in the current version
       if (setting.mapboxBridge.proximity.enabled) {
+        // See: https://docs.mapbox.com/mapbox-gl-js/example/mapbox-gl-geocoder/
         Drupal.Mapbox.map.addControl(L.mapbox.geocoderControl('mapbox.places', {
           autocomplete: true
         }));
@@ -144,53 +184,16 @@
     * Build marker geojson
     * */
     addMarker: function(markerData, setting) {
-      // for custom icons provided by drupal
-      if (markerData.icon) {
-        if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
-
-          // Calculate Icon's anchor position based on size and user preferences
-          var iconAnchorPosition = Drupal.behaviors.mapboxBridge.getIconAnchor(
-            markerData.iconWidth,
-            markerData.iconHeight,
-            setting.markerAnchor
-          );
-
-          // Calculate popup anchor position to be 3px above the marker and
-          // always centered on top of the icon
-          var popupAnchor = [
-            markerData.iconWidth / 2 - parseFloat(iconAnchorPosition[0]),
-            -(parseFloat(iconAnchorPosition[1]) + 3)
-          ];
-
-          // create an icon
-          Drupal.Mapbox.icons[markerData.name] = {
-            name: markerData.name,
-            iconUrl: markerData.icon,
-            marker: {
-              'iconUrl': markerData.icon,
-              'iconSize': [markerData.iconWidth, markerData.iconHeight],
-              'iconAnchor': iconAnchorPosition,
-              'popupAnchor': popupAnchor,
-              'className': 'custom-marker' + (setting.popup.enabled ? ' clickable' : '')
-            }
-          };
+      if (markerData.lat && markerData.lon) {
+        var iconURL = Drupal.Mapbox.defaultIcon // default
+        if (markerData.icon) {
+          iconURL = markerData.icon;
         }
+        Drupal.Mapbox.icons[markerData.name] = {
+          name: markerData.name,
+          iconUrl: iconURL,
+        };
 
-      // for icons based on mapbox
-      } else if (typeof markerData.type != 'undefined') {
-
-        if (typeof Drupal.Mapbox.layers[markerData.name] == 'undefined') {
-          Drupal.Mapbox.icons[markerData.name] = {
-            name: markerData.name,
-            marker: {
-              'marker-symbol': markerData.type,
-              iconUrl: 'https://api.mapbox.com/v4/marker/pin-m.png?access_token=' + L.mapbox.accessToken
-            }
-          };
-        }
-      }
-
-      if (markerData.lat && markerData.lon && typeof Drupal.Mapbox.icons[markerData.name]['marker'] != 'undefined') {
         // setup the filter properties
         if (setting.filter.enabled) {
 
@@ -242,8 +245,9 @@
             'coordinates': [markerData.lon, markerData.lat]
           },
           'properties': {
-            'icon': Drupal.Mapbox.icons[markerData.name]['marker'],
             'popup_entity_id': markerData.popup_entity_id,
+            'nid': markerData.nid,
+            'type': markerData.type,
             'filter': setting.filter.enabled ? filter : false
           }
         });
